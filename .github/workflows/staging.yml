@@ -1,0 +1,90 @@
+name: Staging
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - .husky/**
+      - .vscode/**
+      - .env.example
+      - .gitignore
+      - "*.md"
+      - renovate.json
+
+jobs:
+  pre_ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: echo "commit_message=$(git log --format=%B -n 1 HEAD)" > $GITHUB_ENV
+
+    outputs:
+      commit_message: $( echo "${{ env.commit_message }}" )
+
+  lint:
+    needs: pre_ci
+    runs-on: ubuntu-latest
+    environment: Lint
+    if: "(!contains(needs.pre_ci.outputs.commit_message, '[skip lint]') && !contains(needs.pre_ci.outputs.commit_message, 'chore(release): '))"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: pnpm/action-setup@v2
+        id: pnpm-install
+        with:
+          version: 8
+          run_install: false
+
+      - id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - run: pnpm install
+
+      - run: pnpm lint
+
+  test:
+    needs: pre_ci
+    runs-on: ubuntu-latest
+    environment: Test
+    if: "(!contains(needs.pre_ci.outputs.commit_message, '[skip test]') && !contains(needs.pre_ci.outputs.commit_message, 'chore(release): '))"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: pnpm/action-setup@v2
+        id: pnpm-install
+        with:
+          version: 8
+          run_install: false
+
+      - id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - run: pnpm install
+
+      - run: pnpm test

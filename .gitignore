@@ -1,0 +1,9 @@
+.env
+node_modules/
+dist/
+prisma/data.db
+logs/
+configs/*.json
+configs/*.yml
+tsconfig.tsbuildinfo
+cache.json
