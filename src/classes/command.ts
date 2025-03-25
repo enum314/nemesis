@@ -11,11 +11,11 @@ import { Logger } from "../lib/logger.js";
 
 type CommandRunner = (
   interaction: ChatInputCommandInteraction<"cached">
-) => Promise<any> | any;
+) => Promise<void> | void;
 
 type CommandAutocompleter = (
   interaction: AutocompleteInteraction<"cached">
-) => Promise<any> | any;
+) => Promise<void> | void;
 
 type CommandBuilder =
   | SlashCommandBuilder

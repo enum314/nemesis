@@ -14,5 +14,5 @@ export function chunk<T>(array: T[], size: number): T[][] {
 
   return new Array(Math.ceil(clone.length / size))
     .fill(0)
-    .map((_) => clone.splice(0, size));
+    .map(() => clone.splice(0, size));
 }

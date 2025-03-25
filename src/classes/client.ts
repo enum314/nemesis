@@ -1,4 +1,8 @@
-import { Collection, Client as DiscordClient } from "discord.js";
+import {
+  Collection,
+  Client as DiscordClient,
+  type ClientEvents,
+} from "discord.js";
 
 import { Logger } from "../lib/logger.js";
 import { Command } from "./command.js";
@@ -12,7 +16,8 @@ export class Client<
 
   public readonly commands: Collection<string, Command> = new Collection();
 
-  public readonly events: Collection<string, Event<any>> = new Collection();
+  public readonly events: Collection<string, Event<keyof ClientEvents>> =
+    new Collection();
 
   public readonly dispatcher: Dispatcher = new Dispatcher(
     <DiscordClient<true>>this
@@ -25,7 +30,7 @@ declare module "discord.js" {
 
     readonly commands: Collection<string, Command>;
 
-    readonly events: Collection<string, Event<any>>;
+    readonly events: Collection<string, Event<keyof ClientEvents>>;
 
     readonly dispatcher: Dispatcher;
   }

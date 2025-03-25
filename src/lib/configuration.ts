@@ -49,9 +49,16 @@ export class Configuration<ConfigurationStructure> {
 
     const current = await this.get();
 
-    const data = merge(merge(this.data.defaults, current), partial, {
-      clone: true,
-    }) as ConfigurationStructure;
+    const data = merge(
+      merge(
+        this.data.defaults as Record<string, unknown>,
+        current as Record<string, unknown>
+      ),
+      partial,
+      {
+        clone: true,
+      }
+    ) as ConfigurationStructure;
 
     await writeFile(
       [
@@ -82,7 +89,9 @@ export class Configuration<ConfigurationStructure> {
             : yaml.parse(buffer.toString());
 
         const response = this.data.schema.safeParse(
-          merge(this.data.defaults, fileData, { clone: true })
+          merge(this.data.defaults as Record<string, unknown>, fileData, {
+            clone: true,
+          })
         );
 
         if (!response.success) {
@@ -91,7 +100,7 @@ export class Configuration<ConfigurationStructure> {
 
         try {
           deepStrictEqual(response.data, fileData);
-        } catch (err) {
+        } catch (_err) {
           // Only update if there are real differences that need to be written back
           // This prevents unnecessary overwrites
           const stringifiedOriginal = JSON.stringify(fileData);

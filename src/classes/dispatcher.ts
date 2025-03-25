@@ -81,7 +81,8 @@ export class Dispatcher {
             throw new Error();
           }
         }
-      } catch (err) {
+         
+      } catch (_err) {
         modified = true;
       }
     } else {

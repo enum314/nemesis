@@ -14,4 +14,4 @@ export type InhibitorFunction = (
 export type ClientEventListener<ClientEvent extends keyof ClientEvents> = (
   client: Client,
   ...args: ClientEvents[ClientEvent]
-) => any;
+) => void | Promise<void>;

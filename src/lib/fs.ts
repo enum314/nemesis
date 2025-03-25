@@ -19,7 +19,7 @@ export function readFile(paths: string[]) {
 export async function existsFile(paths: string[]) {
   try {
     return (await stat(paths)).isFile();
-  } catch (err) {
+  } catch (_err) {
     return false;
   }
 }
@@ -39,7 +39,7 @@ export async function mkdir(paths: string[]) {
 export async function existsDirectory(paths: string[]) {
   try {
     return (await stat(paths)).isDirectory();
-  } catch (err) {
+  } catch (_err) {
     return false;
   }
 }
