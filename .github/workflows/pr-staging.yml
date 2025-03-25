@@ -33,7 +33,7 @@ jobs:
         with:
           node-version: 22
 
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v4
         id: pnpm-install
         with:
           version: 10
@@ -65,7 +65,7 @@ jobs:
         with:
           node-version: 22
 
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v4
         id: pnpm-install
         with:
           version: 10
