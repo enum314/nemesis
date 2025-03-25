@@ -9,10 +9,12 @@ const command = new Command(
 command.run(async (interaction) => {
   const sent = await interaction.reply({
     content: "Pinging...",
-    fetchReply: true,
+    withResponse: true,
   });
 
-  const latency = sent.createdTimestamp - interaction.createdTimestamp;
+  const latency =
+    (sent?.resource?.message?.createdTimestamp ?? 0) -
+    interaction.createdTimestamp;
 
   await interaction.editReply({
     content: `Pong! 🏓\nBot Latency: ${latency}ms\nAPI Latency: ${interaction.client.ws.ping}ms`,
