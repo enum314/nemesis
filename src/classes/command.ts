@@ -4,10 +4,10 @@ import {
   SlashCommandBuilder,
   SlashCommandSubcommandBuilder,
   SlashCommandSubcommandGroupBuilder,
-  SlashCommandSubcommandsOnlyBuilder,
+  type SlashCommandSubcommandsOnlyBuilder,
 } from "discord.js";
 
-import { Logger } from "../lib/logger";
+import { Logger } from "../lib/logger.js";
 
 type CommandRunner = (
   interaction: ChatInputCommandInteraction<"cached">
