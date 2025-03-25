@@ -1,11 +1,15 @@
 import "dotenv/config";
 
 import { GatewayIntentBits } from "discord.js";
+import ms from "ms";
 
 import { Client } from "./classes/client.js";
 import { Command } from "./classes/command.js";
 import { Event } from "./classes/event.js";
+import { setCurrentShardId, setDiscordClient } from "./lib/logger.js";
 import { getAllFiles } from "./utils/loadFiles.js";
+
+const startingTime = Date.now();
 
 const client = new Client({
   intents: [
@@ -14,6 +18,9 @@ const client = new Client({
     GatewayIntentBits.MessageContent,
   ],
 });
+
+// Set the client in the logger for shard detection
+setDiscordClient(client);
 
 // Only log startup message if not running as a shard
 const isShardProcess = !!client.shard;
@@ -132,7 +139,14 @@ client.once("ready", async () => {
 
   if (!isShardProcess) {
     client.logger.info(`[Discord] ${client.user?.tag} / ${client.user?.id}`);
+    client.logger.info(`Done! ${ms(Date.now() - startingTime)}`);
+  } else {
+    if (client.shard) {
+      setCurrentShardId(client.shard.ids[0]);
+    }
   }
 });
 
 client.login().catch((error: Error) => client.logger.error(error));
+
+export default client;

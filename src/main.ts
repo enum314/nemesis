@@ -27,7 +27,9 @@ const TOTAL_SHARDS = process.env.TOTAL_SHARDS
       // Additional options can be configured here
     });
 
-    Logger.info(`Done! ${ms(Date.now() - startingTime)}`);
+    if (ENABLE_SHARDING) {
+      Logger.info(`Done! ${ms(Date.now() - startingTime)}`);
+    }
   } catch (error) {
     Logger.error("Failed to start bot:", error);
     process.exit(1);

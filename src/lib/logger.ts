@@ -1,23 +1,47 @@
-import path from "path";
+import { Client } from "discord.js";
 import winston from "winston";
-import DailyRotateFile from "winston-daily-rotate-file";
 
-// Global variable that will be set if we're in a shard
+// Global variables for shard detection
 let currentShardId: number | null = null;
+let isShardManager = false;
 
-// Function to set the current shard ID
+// Client instance that will be set to check for sharding
+let discordClient: Client | null = null;
+
+// Function to set the Discord client for shard detection
+export function setDiscordClient(client: Client): void {
+  discordClient = client;
+}
+
+// Function to mark this process as the shard manager
+export function setAsShardManager(): void {
+  isShardManager = true;
+}
+
+// Function to set the current shard ID (maintained for backward compatibility)
 export function setCurrentShardId(shardId: number): void {
   currentShardId = shardId;
 }
 
 // Custom format to add shard information
 const shardInfoFormat = winston.format((info) => {
-  // Check if we're in a sharded environment
+  // First check: explicitly set shard ID
   if (currentShardId !== null) {
     info.shardId = `[Shard ${currentShardId}]`;
-  } else if (process.env.ENABLE_SHARDING === "true") {
+  }
+  // Second check: check client's shard property
+  else if (discordClient?.shard) {
+    const shardId = discordClient.shard.ids[0];
+    info.shardId = `[Shard ${shardId}]`;
+    // Cache the shard ID for future logs
+    currentShardId = shardId;
+  }
+  // Third check: if marked as shard manager
+  else if (isShardManager) {
     info.shardId = "[Shard Manager]";
-  } else {
+  }
+  // Not sharded
+  else {
     info.shardId = "";
   }
   return info;
@@ -40,26 +64,9 @@ const consoleTransport = new winston.transports.Console({
   ),
 });
 
-const dailyFileRotateFileTransport = new DailyRotateFile({
-  dirname: "logs",
-  filename: `%DATE%.log`,
-  datePattern: "YYYY-MM-DD-HH",
-  auditFile: `logs${path.sep}audit.json`,
-  zippedArchive: true,
-  maxSize: "20m",
-  maxFiles: "1d",
-  createSymlink: true,
-  symlinkName: `logs${path.sep}latest.log`,
-  format: winston.format.combine(
-    ...formats,
-    winston.format.printf(({ level, message, stack, timestamp, shardId }) => {
-      return `[${timestamp}]${shardId ? ` ${shardId}` : ""} [${level}] ${stack ?? message}`;
-    })
-  ),
-});
-
+// Create and export the logger with console transport only
 export const Logger = winston.createLogger({
   level: process.env.LOG_LEVEL || "info",
   format: winston.format.combine(...formats),
-  transports: [consoleTransport, dailyFileRotateFileTransport],
+  transports: [consoleTransport],
 });

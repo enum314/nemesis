@@ -4,7 +4,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { ShardingManager } from "discord.js";
 
-import { Logger } from "./lib/logger.js";
+import { Logger, setAsShardManager } from "./lib/logger.js";
 
 // Get the directory name of the current module
 const __filename = fileURLToPath(import.meta.url);
@@ -35,6 +35,9 @@ export async function initializeBot(
     await import("./index.js");
     return;
   }
+
+  // Mark this process as the shard manager
+  setAsShardManager();
 
   // Get token from options or environment variable
   const token = options.token || process.env.DISCORD_TOKEN;
