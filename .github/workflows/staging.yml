@@ -27,7 +27,7 @@ jobs:
     needs: pre_ci
     runs-on: ubuntu-latest
     environment: Lint
-    if: "(!contains(needs.pre_ci.outputs.commit_message, '[skip lint]') && !contains(needs.pre_ci.outputs.commit_message, 'chore(release): '))"
+    if: "(!contains(needs.pre_ci.outputs.commit_message, '[skip lint]'))"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -60,7 +60,7 @@ jobs:
     needs: pre_ci
     runs-on: ubuntu-latest
     environment: Test
-    if: "(!contains(needs.pre_ci.outputs.commit_message, '[skip test]') && !contains(needs.pre_ci.outputs.commit_message, 'chore(release): '))"
+    if: "(!contains(needs.pre_ci.outputs.commit_message, '[skip test]'))"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -88,3 +88,19 @@ jobs:
       - run: pnpm install
 
       - run: pnpm test
+
+  # deploy:
+  #   needs: [lint, test]
+  #   runs-on: ubuntu-latest
+  #   environment: Staging
+  #   if: "(!contains(needs.pre_ci.outputs.commit_message, '[skip deploy]'))"
+  #   steps:
+  #     - name: Deploy to staging server
+  #       uses: appleboy/ssh-action@v1
+  #       with:
+  #         host: ${{ secrets.STAGING_HOST }}
+  #         username: ${{ secrets.STAGING_USER }}
+  #         key: ${{ secrets.STAGING_SSH_KEY }}
+  #         script: |
+  #           cd ${{ secrets.STAGING_DEPLOY_PATH }}
+  #           ./deploy.sh --update

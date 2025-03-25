@@ -1,14 +1,18 @@
 # Nemesis
 
-A modern Node.js application template with Docker configuration and GitHub workflows.
+A modern Node.js application template designed to jumpstart your projects with best practices and ready-to-use infrastructure.
 
-## 🚀 Features
+## 🚀 About This Template
 
-- **Node.js**: Using Node.js 22 for latest JavaScript/TypeScript features
-- **PNPM**: Fast and efficient package management with PNPM 10
-- **Docker**: Multi-stage Docker setup for development and production
-- **CI/CD**: GitHub Actions workflows for testing, linting, and deployment
-- **Production-Ready**: Optimized for performance and maintainability
+This is a template repository that provides a solid foundation for building modern Node.js applications. It's designed to be forked or used as a starting point for new projects, saving you hours of initial setup and configuration.
+
+The template offers:
+
+- **Ready-to-use infrastructure** with Docker, CI/CD workflows, and deployment scripts
+- **Modern tech stack** with Node.js 22 and PNPM 10
+- **Development best practices** baked in from the start
+- **Production-ready configuration** for immediate deployment
+- **Pterodactyl integration** for easy hosting on game server panels
 
 ## 📋 Prerequisites
 
@@ -17,14 +21,20 @@ A modern Node.js application template with Docker configuration and GitHub workf
 - [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) (optional, for containerized development)
 - [Git](https://git-scm.com/)
 
-## 🛠️ Installation
+## 🛠️ Getting Started
 
-### Local Development
+### Using This Template
 
 ```bash
-# Clone the repository
-git clone https://github.com/enum314/nemesis.git
-cd nemesis
+# Clone the template (or use GitHub's "Use this template" button)
+git clone https://github.com/enum314/nemesis.git my-new-project
+cd my-new-project
+
+# Customize for your project
+# - Update package.json with your project details
+# - Modify .env.example for your environment variables
+# - Customize the Dockerfile if needed
+# - Update this README!
 
 # Install dependencies
 pnpm install
@@ -33,17 +43,95 @@ pnpm install
 pnpm dev
 ```
 
-### Using Docker
+### Local Development
 
 ```bash
 # Start development environment
-docker-compose up app-dev
+pnpm dev
 
-# OR start production environment
+# OR with Docker
+docker-compose up app-dev
+```
+
+### Production Environment
+
+```bash
+# Start production environment with Docker
 docker-compose up app-prod
 ```
 
-## 🏗️ Project Structure
+## 🚢 Deployment Options
+
+### 1. Server Deployment with Script
+
+This template includes a deployment script that pulls directly from GitHub:
+
+```bash
+# First-time deployment
+./deploy.sh --first-run --path /opt/nemesis
+
+# Update existing deployment
+./deploy.sh --update --path /opt/nemesis
+```
+
+The deployment script supports various options:
+
+```bash
+Usage: deploy.sh [OPTIONS]
+Options:
+  --repo URL        Git repository URL (default: https://github.com/enum314/nemesis.git)
+  --branch NAME     Branch to deploy (default: main)
+  --path PATH       Installation path (default: /opt/nemesis)
+  --first-run       Perform first-time setup
+  --force-rebuild   Force rebuild of Docker containers
+  --show-logs       Show Docker logs after deployment
+  --update          Update existing deployment
+  --help            Show this help message
+```
+
+### 2. Pterodactyl Panel Deployment
+
+The template includes Pterodactyl egg files for deployment on Pterodactyl game server panels:
+
+- `egg-nemesis.json` - JSON format egg for Pterodactyl
+- `egg-nemesis.yml` - YAML format egg for Pterodactyl
+
+#### How to Use the Pterodactyl Egg:
+
+1. **Import to Pterodactyl Panel**:
+
+   - Log in to your Pterodactyl admin panel
+   - Go to Nests > Import Egg
+   - Upload the `egg-nemesis.json` file
+
+2. **Create a New Server**:
+
+   - In the Pterodactyl admin panel, create a new server
+   - Select the Nemesis egg from the list
+   - Configure server settings including port allocations and resources
+
+3. **Configurable Options**:
+
+   - **Auto Update**: Automatically pull changes on startup
+   - **Node Environment**: Choose between production, development, staging, or test
+   - **Additional Packages**: Install extra Node.js packages if needed
+   - **Wipe Directory**: Option to clean installation directory
+   - **Startup Command**: Customize how the application starts
+
+4. **After Installation**:
+   - The server will automatically install your Nemesis template
+   - It will configure the correct port in .env
+   - The server will build and start automatically
+
+The deployment script handles:
+
+- Environment setup
+- Pulling latest changes from GitHub
+- Building and starting Docker containers
+- Intelligent rebuilding (only when needed)
+- Status checking and error reporting
+
+## 🏗️ Template Structure
 
 ```
 nemesis/
@@ -53,6 +141,9 @@ nemesis/
 ├── .env.example           # Example environment variables
 ├── Dockerfile             # Docker configuration
 ├── docker-compose.yml     # Docker Compose configuration
+├── deploy.sh              # Deployment script
+├── egg-nemesis.json       # Pterodactyl egg (JSON format)
+├── egg-nemesis.yml        # Pterodactyl egg (YAML format)
 ├── package.json           # Project metadata and scripts
 ├── pnpm-lock.yaml         # Lock file for dependencies
 └── tsconfig.json          # TypeScript configuration
@@ -98,16 +189,18 @@ docker build --target production -t nemesis-prod .
 - `pnpm dev` - Start development server
 - `pnpm build` - Build for production
 - `pnpm start` - Start production server
-- `pnpm test` - Run tests
+- `pnpm test` - Run tests and build
 - `pnpm lint` - Check for code style issues
+- `pnpm v:patch` - Version bump patch (0.0.x)
+- `pnpm v:minor` - Version bump minor (0.x.0)
+- `pnpm v:major` - Version bump major (x.0.0)
 
-## 🚢 Deployment
+## 🚢 CI/CD
 
-The project includes GitHub workflows for:
+The template includes GitHub workflows for:
 
-- **PR Staging**: Runs tests and lint checks on pull requests
-- **Staging**: Deploys to staging environment when merging to main
-- **Release**: Creates a release when pushing to production or tags
+- **PR Staging**: Runs tests, lint checks, and builds on pull requests
+- **Staging**: Runs tests and lint checks when merging to main
 
 ## 🛡️ Environment Variables
 
@@ -134,12 +227,12 @@ pnpm lint
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This template is licensed under the MIT License - see the LICENSE file for details.
 
-## 👥 Contributing
+## 👥 Customizing This Template
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. Replace this README with information specific to your project
+2. Update package.json with your project details
+3. Customize the Docker setup if needed
+4. Update environment variables in .env.example
+5. Add your application code to the src directory

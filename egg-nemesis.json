@@ -1,0 +1,80 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2023-06-12T00:00:00+00:00",
+    "name": "Nemesis",
+    "author": "enum314",
+    "description": "A modern Node.js application template with Docker configuration and GitHub workflows.",
+    "features": [
+        "docker"
+    ],
+    "docker_images": {
+        "Node 22": "ghcr.io/parkervcp/yolks:nodejs_22",
+        "Node 20": "ghcr.io/parkervcp/yolks:nodejs_20"
+    },
+    "file_denylist": [],
+    "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then pnpm add -g ${NODE_PACKAGES}; fi; if [[ ! -d node_modules ]]; then pnpm install; fi; if [[ -f build.sh ]]; then chmod +x build.sh && ./build.sh; fi; if [[ ! -z ${ENVIRONMENT} ]]; then export NODE_ENV=${ENVIRONMENT}; fi; node .",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"Server started on port\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# Nemesis Node.js Template Install Script\r\n#\r\n# Server Files: \/mnt\/server\r\napt update\r\napt install -y git curl\r\ncurl -fsSL https:\/\/get.pnpm.io\/install.sh | sh -\r\nSOURCE=\"https://github.com/enum314/nemesis.git\"\r\nBRANCH=\"main\"\r\nDEPLOY_DIR=\"/mnt/server\"\r\n\r\n# Make sure pterodactyl user can use pnpm\r\nexport PNPM_HOME=\"/usr/local/pnpm\"\r\nexport PATH=\"$PNPM_HOME:$PATH\"\r\npnpm config set store-dir /mnt/server/.pnpm-store\r\n\r\n# Clone or update repository\r\nif [ -d \"$DEPLOY_DIR/.git\" ]; then\r\n    cd \"$DEPLOY_DIR\"\r\n    git fetch origin\r\n    git reset --hard \"origin/$BRANCH\"\r\nelse\r\n    if [ -d \"$DEPLOY_DIR\" ]; then\r\n        if [ \"$(ls -A \"$DEPLOY_DIR\")\" ]; then\r\n            echo \"WARNING: Directory $DEPLOY_DIR is not empty\"\r\n            if [ \"$WIPE\" = \"1\" ]; then\r\n                echo \"Wiping directory...\"\r\n                rm -rf \"$DEPLOY_DIR\"\r\n                mkdir -p \"$DEPLOY_DIR\"\r\n            fi\r\n        fi\r\n    else\r\n        mkdir -p \"$DEPLOY_DIR\"\r\n    fi\r\n    \r\n    cd /tmp\r\n    git clone -b \"$BRANCH\" \"$SOURCE\" \"$DEPLOY_DIR\"\r\n    cd \"$DEPLOY_DIR\"\r\nfi\r\n\r\n# Setup environment\r\nif [ ! -f \"$DEPLOY_DIR/.env\" ]; then\r\n    if [ -f \"$DEPLOY_DIR/.env.example\" ]; then\r\n        cp \"$DEPLOY_DIR/.env.example\" \"$DEPLOY_DIR/.env\"\r\n        echo \"Created .env file from .env.example\"\r\n        # Update port in .env to match Pterodactyl's allocated port\r\n        sed -i \"s/PORT=.*/PORT={{server.build.default.port}}/g\" \"$DEPLOY_DIR/.env\"\r\n        echo \"Updated PORT in .env to {{server.build.default.port}}\"\r\n    else\r\n        echo \"Warning: No .env.example file found. Creating minimal .env file.\"\r\n        echo \"PORT={{server.build.default.port}}\" > \"$DEPLOY_DIR/.env\"\r\n        echo \"NODE_ENV=production\" >> \"$DEPLOY_DIR/.env\"\r\n    fi\r\nfi\r\n\r\n# Install dependencies\r\ncd \"$DEPLOY_DIR\"\r\npnpm install\r\n\r\n# Build the application\r\nif [ -f \"$DEPLOY_DIR/build.sh\" ]; then\r\n    chmod +x \"$DEPLOY_DIR/build.sh\"\r\n    ./build.sh\r\nelse\r\n    pnpm build\r\nfi\r\n\r\necho \"Installation complete.\"\r\necho \"Nemesis template has been installed.\"\r\necho \"Server will start on port {{server.build.default.port}} as configured in .env\"",
+            "container": "ghcr.io/parkervcp/installer:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Startup Command",
+            "description": "The command that will be run to start the server. Modifying this may break the server.",
+            "env_variable": "STARTUP_CMD",
+            "default_value": "node .",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string"
+        },
+        {
+            "name": "Auto Update",
+            "description": "Pull the latest changes from Git on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean"
+        },
+        {
+            "name": "Node Environment",
+            "description": "The Node environment to use.",
+            "env_variable": "ENVIRONMENT",
+            "default_value": "production",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:production,development,staging,test"
+        },
+        {
+            "name": "Additional Node Packages",
+            "description": "Additional Node packages to install globally. Separate with spaces.",
+            "env_variable": "NODE_PACKAGES",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string"
+        },
+        {
+            "name": "Wipe Directory on Install",
+            "description": "Whether to wipe the directory when installing.",
+            "env_variable": "WIPE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean"
+        }
+    ]
+}

@@ -1,0 +1,137 @@
+name: Nemesis
+author: enum314
+description: A modern Node.js application template with Docker configuration and GitHub workflows.
+docker_image: ghcr.io/parkervcp/yolks:nodejs_22
+features:
+  - docker
+startup: |
+  if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == "1" ]]; then 
+    git pull; 
+  fi; 
+  if [[ ! -z ${NODE_PACKAGES} ]]; then 
+    pnpm add -g ${NODE_PACKAGES}; 
+  fi; 
+  if [[ ! -d node_modules ]]; then 
+    pnpm install; 
+  fi; 
+  if [[ -f build.sh ]]; then 
+    chmod +x build.sh && ./build.sh; 
+  fi; 
+  if [[ ! -z ${ENVIRONMENT} ]]; then 
+    export NODE_ENV=${ENVIRONMENT}; 
+  fi; 
+  {{STARTUP_CMD}}
+config:
+  files: {}
+  startup:
+    done: "Server started on port"
+  logs: {}
+  stop: "^C"
+variables:
+  - name: Startup Command
+    description: The command that will be run to start the server. Modifying this may break the server.
+    env_variable: STARTUP_CMD
+    default_value: node .
+    user_viewable: true
+    user_editable: true
+    rules: required|string
+  - name: Auto Update
+    description: Pull the latest changes from Git on startup.
+    env_variable: AUTO_UPDATE
+    default_value: "1"
+    user_viewable: true
+    user_editable: true
+    rules: required|boolean
+  - name: Node Environment
+    description: The Node environment to use.
+    env_variable: ENVIRONMENT
+    default_value: production
+    user_viewable: true
+    user_editable: true
+    rules: required|string|in:production,development,staging,test
+  - name: Additional Node Packages
+    description: Additional Node packages to install globally. Separate with spaces.
+    env_variable: NODE_PACKAGES
+    default_value: ""
+    user_viewable: true
+    user_editable: true
+    rules: nullable|string
+  - name: Wipe Directory on Install
+    description: Whether to wipe the directory when installing.
+    env_variable: WIPE
+    default_value: "0"
+    user_viewable: true
+    user_editable: true
+    rules: required|boolean
+install:
+  script: |
+    #!/bin/bash
+    # Nemesis Node.js Template Install Script
+    #
+    # Server Files: /mnt/server
+    apt update
+    apt install -y git curl
+    curl -fsSL https://get.pnpm.io/install.sh | sh -
+    SOURCE="https://github.com/enum314/nemesis.git"
+    BRANCH="main"
+    DEPLOY_DIR="/mnt/server"
+
+    # Make sure pterodactyl user can use pnpm
+    export PNPM_HOME="/usr/local/pnpm"
+    export PATH="$PNPM_HOME:$PATH"
+    pnpm config set store-dir /mnt/server/.pnpm-store
+
+    # Clone or update repository
+    if [ -d "$DEPLOY_DIR/.git" ]; then
+        cd "$DEPLOY_DIR"
+        git fetch origin
+        git reset --hard "origin/$BRANCH"
+    else
+        if [ -d "$DEPLOY_DIR" ]; then
+            if [ "$(ls -A "$DEPLOY_DIR")" ]; then
+                echo "WARNING: Directory $DEPLOY_DIR is not empty"
+                if [ "$WIPE" = "1" ]; then
+                    echo "Wiping directory..."
+                    rm -rf "$DEPLOY_DIR"
+                    mkdir -p "$DEPLOY_DIR"
+                fi
+            fi
+        else
+            mkdir -p "$DEPLOY_DIR"
+        fi
+        
+        cd /tmp
+        git clone -b "$BRANCH" "$SOURCE" "$DEPLOY_DIR"
+        cd "$DEPLOY_DIR"
+    fi
+
+    # Setup environment
+    if [ ! -f "$DEPLOY_DIR/.env" ]; then
+        if [ -f "$DEPLOY_DIR/.env.example" ]; then
+            cp "$DEPLOY_DIR/.env.example" "$DEPLOY_DIR/.env"
+            echo "Created .env file from .env.example"
+            # Update port in .env to match Pterodactyl's allocated port
+            sed -i "s/PORT=.*/PORT={{server.build.default.port}}/g" "$DEPLOY_DIR/.env"
+            echo "Updated PORT in .env to {{server.build.default.port}}"
+        else
+            echo "Warning: No .env.example file found. Creating minimal .env file."
+            echo "PORT={{server.build.default.port}}" > "$DEPLOY_DIR/.env"
+            echo "NODE_ENV=production" >> "$DEPLOY_DIR/.env"
+        fi
+    fi
+
+    # Install dependencies
+    cd "$DEPLOY_DIR"
+    pnpm install
+
+    # Build the application
+    if [ -f "$DEPLOY_DIR/build.sh" ]; then
+        chmod +x "$DEPLOY_DIR/build.sh"
+        ./build.sh
+    else
+        pnpm build
+    fi
+
+    echo "Installation complete."
+    echo "Nemesis template has been installed."
+    echo "Server will start on port {{server.build.default.port}} as configured in .env"
