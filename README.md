@@ -1,19 +1,19 @@
 # Nemesis
 
-A modern Node.js application template designed to jumpstart your projects with best practices and ready-to-use infrastructure.
+A modern Discord bot template designed to jumpstart your bot development with best practices and ready-to-use infrastructure. While primarily focused on Discord bots, Nemesis can also serve as a foundation for any Node.js application.
 
 ## 🚀 About This Template
 
-This is a template repository that provides a solid foundation for building modern Node.js applications. It's designed to be forked or used as a starting point for new projects, saving you hours of initial setup and configuration.
+This is a template repository that provides a solid foundation for building modern Discord bots and Node.js applications. It's designed to be forked or used as a starting point for new projects, saving you hours of initial setup and configuration.
 
 The template offers:
 
+- **Discord.js integration** with advanced sharding and bot framework
 - **Ready-to-use infrastructure** with Docker, CI/CD workflows, and deployment scripts
 - **Modern tech stack** with Node.js 22 and PNPM 10
 - **Development best practices** baked in from the start
 - **Production-ready configuration** for immediate deployment
 - **Pterodactyl integration** for easy hosting on game server panels
-- **Discord.js bot framework** with advanced sharding support
 
 ## 📋 Prerequisites
 

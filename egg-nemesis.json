@@ -4,7 +4,7 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2023-06-12T00:00:00+00:00",
+    "exported_at": "2025-03-26T00:00:00+00:00",
     "name": "Nemesis",
     "author": "enum314",
     "description": "A modern Node.js application template with Docker configuration and GitHub workflows.",

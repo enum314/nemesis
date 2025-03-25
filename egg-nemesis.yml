@@ -1,6 +1,7 @@
 name: Nemesis
 author: enum314
 description: A modern Node.js application template with Docker configuration and GitHub workflows.
+exported_at: "2025-03-26T00:00:00+00:00"
 docker_image: ghcr.io/parkervcp/yolks:nodejs_22
 features:
   - docker
