@@ -24,10 +24,7 @@
         "mustache": "^4.2.0",
         "pretty-ms": "^9.2.0",
         "rate-limiter-flexible": "^6.2.1",
-        "semver": "^7.7.1",
-        "semver-regex": "^4.0.5",
         "winston": "^3.17.0",
-        "winston-daily-rotate-file": "^5.0.0",
         "yaml": "^2.7.0",
         "zod": "^3.24.2"
     },
@@ -39,7 +36,6 @@
         "@types/ms": "^2.1.0",
         "@types/mustache": "^4.2.5",
         "@types/node": "^22.13.13",
-        "@types/semver": "^7.5.8",
         "@typescript-eslint/eslint-plugin": "^8.28.0",
         "@typescript-eslint/parser": "^8.28.0",
         "eslint": "^9.23.0",
