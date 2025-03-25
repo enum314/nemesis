@@ -1,14 +1,11 @@
 import "dotenv/config";
 
 import { GatewayIntentBits } from "discord.js";
-import ms from "ms";
 
 import { Client } from "./classes/client.js";
 import { Command } from "./classes/command.js";
 import { Event } from "./classes/event.js";
 import { getAllFiles } from "./utils/loadFiles.js";
-
-const startingTime = Date.now();
 
 const client = new Client({
   intents: [
@@ -18,13 +15,19 @@ const client = new Client({
   ],
 });
 
-client.logger.info("Loading...");
+// Only log startup message if not running as a shard
+const isShardProcess = !!client.shard;
+if (!isShardProcess) {
+  client.logger.info("Loading...");
+}
 
 /**
  * Dynamically load all command files
  */
 async function loadCommands() {
-  client.logger.info("[Commands] Loading commands...");
+  if (!isShardProcess) {
+    client.logger.info("[Commands] Loading commands...");
+  }
   const commandFiles = getAllFiles("commands");
 
   for (const file of commandFiles) {
@@ -36,11 +39,15 @@ async function loadCommands() {
       // Check if the file exports a Command instance
       if (module.default instanceof Command) {
         client.commands.set(module.default.name, module.default);
-        client.logger.info(`- ${module.default.name}`);
+        if (!isShardProcess) {
+          client.logger.info(`- ${module.default.name}`);
+        }
       } else {
-        client.logger.warn(
-          `[Commands] Skipping file ${file}: Command instance not found`
-        );
+        if (!isShardProcess) {
+          client.logger.warn(
+            `[Commands] Skipping file ${file}: Command instance not found`
+          );
+        }
       }
     } catch (error) {
       client.logger.error(`[Commands] Failed to load command file ${file}`);
@@ -48,16 +55,20 @@ async function loadCommands() {
     }
   }
 
-  client.logger.info(
-    `[Commands] Loaded ${client.commands.size} command${client.commands.size > 1 ? "s" : ""}`
-  );
+  if (!isShardProcess) {
+    client.logger.info(
+      `[Commands] Loaded ${client.commands.size} command${client.commands.size > 1 ? "s" : ""}`
+    );
+  }
 }
 
 /**
  * Dynamically load all event files
  */
 async function loadEvents() {
-  client.logger.info("[Events] Loading events...");
+  if (!isShardProcess) {
+    client.logger.info("[Events] Loading events...");
+  }
   const eventFiles = getAllFiles("events");
 
   for (const file of eventFiles) {
@@ -82,11 +93,15 @@ async function loadEvents() {
         }
 
         client.events.set(eventName, event);
-        client.logger.info(`- ${eventName}`);
+        if (!isShardProcess) {
+          client.logger.info(`- ${eventName}`);
+        }
       } else {
-        client.logger.warn(
-          `[Events] Skipping file ${file}: Event instance not found`
-        );
+        if (!isShardProcess) {
+          client.logger.warn(
+            `[Events] Skipping file ${file}: Event instance not found`
+          );
+        }
       }
     } catch (error) {
       client.logger.error(`[Events] Failed to load event file ${file}`);
@@ -94,15 +109,20 @@ async function loadEvents() {
     }
   }
 
-  client.logger.info(
-    `[Events] Loaded ${client.events.size} event${client.events.size > 1 ? "s" : ""}`
-  );
+  if (!isShardProcess) {
+    client.logger.info(
+      `[Events] Loaded ${client.events.size} event${client.events.size > 1 ? "s" : ""}`
+    );
+  }
 }
 
-client.logger.info(`[Discord] Connecting...`);
+if (!isShardProcess) {
+  client.logger.info(`[Discord] Connecting...`);
+}
 
 client.once("ready", async () => {
-  client.logger.info(`[Discord] Connected!`);
+  // We'll handle the ready log in the ready event file
+  // since we want that log to appear for both non-sharded and sharded instances
 
   // Load commands and events
   await loadCommands();
@@ -110,9 +130,9 @@ client.once("ready", async () => {
 
   await client.dispatcher.initialize();
 
-  client.logger.info(`[Discord] ${client.user?.tag} / ${client.user?.id}`);
-
-  client.logger.info(`Done! ${ms(Date.now() - startingTime)}`);
+  if (!isShardProcess) {
+    client.logger.info(`[Discord] ${client.user?.tag} / ${client.user?.id}`);
+  }
 });
 
 client.login().catch((error: Error) => client.logger.error(error));

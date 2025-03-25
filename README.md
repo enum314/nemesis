@@ -13,6 +13,7 @@ The template offers:
 - **Development best practices** baked in from the start
 - **Production-ready configuration** for immediate deployment
 - **Pterodactyl integration** for easy hosting on game server panels
+- **Discord.js bot framework** with advanced sharding support
 
 ## 📋 Prerequisites
 
@@ -207,6 +208,41 @@ docker build --target production -t nemesis-prod .
 - `pnpm v:patch` - Version bump patch (0.0.x)
 - `pnpm v:minor` - Version bump minor (0.x.0)
 - `pnpm v:major` - Version bump major (x.0.0)
+
+## 🤖 Discord Bot Sharding
+
+This template includes support for Discord.js sharding, which helps distribute your bot's load across multiple processes when it grows to serve more guilds.
+
+### What is Sharding?
+
+Discord requires sharding for bots in 2,500+ guilds. Sharding splits your bot into multiple processes, each handling a portion of the guilds, which:
+
+- Reduces memory usage and CPU load per process
+- Improves performance by distributing workload
+- Is required by Discord for larger bots
+
+### Using Sharding
+
+Sharding can be enabled/disabled through:
+
+**Environment Variables**:
+
+- `ENABLE_SHARDING`: Set to "true" to enable sharding
+- `TOTAL_SHARDS`: Number of shards to spawn, or "auto" to let Discord.js decide
+
+You can enable sharding by setting these environment variables before starting your bot:
+
+```bash
+# Enable sharding with environment variables
+ENABLE_SHARDING=true node .
+
+# Or with a specific number of shards
+ENABLE_SHARDING=true TOTAL_SHARDS=2 node .
+```
+
+This approach gives you more flexibility since it doesn't rely on predefined scripts. Instead, you can control sharding directly through environment variables when starting the bot. This keeps things simpler and gives you more control over the configuration.
+
+Let me know if you'd prefer a different approach to enabling/disabling sharding in your bot!
 
 ## 🚢 CI/CD
 
