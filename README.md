@@ -72,6 +72,12 @@ This template includes a deployment script that pulls directly from GitHub:
 
 # Update existing deployment
 ./deploy.sh --update --path /opt/nemesis
+
+# Specify a different GitHub repository
+./deploy.sh --first-run --github-user username --repository repo-name --path /opt/nemesis
+
+# For private repositories, include a personal access token
+./deploy.sh --first-run --github-user username --repository repo-name --token YOUR_TOKEN --path /opt/nemesis
 ```
 
 The deployment script supports various options:
@@ -79,7 +85,9 @@ The deployment script supports various options:
 ```bash
 Usage: deploy.sh [OPTIONS]
 Options:
-  --repo URL        Git repository URL (default: https://github.com/enum314/nemesis.git)
+  --github-user USER GitHub username (default: enum314)
+  --repository REPO  Repository name (default: nemesis)
+  --token TOKEN     GitHub personal access token for private repos
   --branch NAME     Branch to deploy (default: main)
   --path PATH       Installation path (default: /opt/nemesis)
   --first-run       Perform first-time setup

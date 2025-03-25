@@ -21,8 +21,10 @@ print_style() {
 }
 
 # Default values
-REPO_URL="https://github.com/enum314/nemesis.git"
+GITHUB_USER="enum314"
+REPOSITORY="nemesis"
 BRANCH="main"
+GITHUB_TOKEN=""
 APP_PATH="/opt/nemesis"
 FIRST_RUN=false
 FORCE_REBUILD=false
@@ -49,6 +51,18 @@ while [[ "$#" -gt 0 ]]; do
         APP_PATH="$2"
         shift
         ;;
+    --github-user)
+        GITHUB_USER="$2"
+        shift
+        ;;
+    --repository)
+        REPOSITORY="$2"
+        shift
+        ;;
+    --token)
+        GITHUB_TOKEN="$2"
+        shift
+        ;;
     --first-run) FIRST_RUN=true ;;
     --force-rebuild) FORCE_REBUILD=true ;;
     --show-logs) SHOW_LOGS=true ;;
@@ -56,7 +70,10 @@ while [[ "$#" -gt 0 ]]; do
     --help)
         echo "Usage: deploy.sh [OPTIONS]"
         echo "Options:"
-        echo "  --repo URL        Git repository URL (default: $REPO_URL)"
+        echo "  --github-user USER GitHub username (default: $GITHUB_USER)"
+        echo "  --repository REPO  Repository name (default: $REPOSITORY)"
+        echo "  --token TOKEN     GitHub personal access token for private repos"
+        echo "  --repo URL        Git repository URL (legacy, use github-user and repository instead)"
         echo "  --branch NAME     Branch to deploy (default: $BRANCH)"
         echo "  --path PATH       Installation path (default: $APP_PATH)"
         echo "  --first-run       Perform first-time setup"
@@ -73,6 +90,19 @@ while [[ "$#" -gt 0 ]]; do
     esac
     shift
 done
+
+# Construct the repository URL
+if [ -z "$REPO_URL" ]; then
+    if [ -z "$GITHUB_TOKEN" ]; then
+        # Public repository
+        REPO_URL="https://github.com/${GITHUB_USER}/${REPOSITORY}.git"
+    else
+        # Private repository with token
+        REPO_URL="https://${GITHUB_TOKEN}@github.com/${GITHUB_USER}/${REPOSITORY}.git"
+    fi
+fi
+
+print_style "Repository URL: $REPO_URL (branch: $BRANCH)\n" "info"
 
 # Check if Docker is installed
 if ! command -v docker &>/dev/null; then
@@ -131,6 +161,9 @@ else
 
     # Save current HEAD commit hash
     OLD_COMMIT=$(git rev-parse HEAD)
+
+    # Update the origin URL if it has changed
+    git remote set-url origin "$REPO_URL"
 
     # Try to pull changes
     git fetch origin "$BRANCH"
@@ -227,7 +260,7 @@ print_style "\n=============================================\n" "success"
 print_style "The application is now running at: http://localhost:3001\n" "success"
 print_style "=============================================\n" "success"
 print_style "\nTo update the application in the future, run:\n" "info"
-print_style "$0 --update --path $APP_PATH\n\n" "info"
+print_style "$0 --update --path $APP_PATH --github-user $GITHUB_USER --repository $REPOSITORY\n\n" "info"
 
 # Create a convenience script for updates if it doesn't exist
 UPDATE_SCRIPT="$APP_PATH/update-app.sh"
@@ -236,7 +269,7 @@ if [ ! -f "$UPDATE_SCRIPT" ]; then
 
     cat >"$UPDATE_SCRIPT" <<EOL
 #!/bin/bash
-$(realpath $0) --update --path $APP_PATH \$@
+$(realpath $0) --update --path $APP_PATH --github-user $GITHUB_USER --repository $REPOSITORY \$@
 EOL
 
     chmod +x "$UPDATE_SCRIPT"
