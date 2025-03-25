@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  # Development service
+  app-dev:
+    build:
+      context: .
+      target: development
+    container_name: nemesis-dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+    command: pnpm dev
+    restart: unless-stopped
+
+  # Production service
+  app-prod:
+    build:
+      context: .
+      target: production
+    container_name: nemesis-prod
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+    restart: unless-stopped
+
+  # You might need additional services like databases
+  # Example for a PostgreSQL database:
+  # db:
+  #   image: postgres:16-alpine
+  #   container_name: nemesis-db
+  #   environment:
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+  #     - POSTGRES_DB=nemesis
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   restart: unless-stopped
+# Uncomment if using the database service
+# volumes:
+#   postgres_data:

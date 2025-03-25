@@ -8,7 +8,7 @@
         "start": "node .",
         "predev": "pnpm clean && prisma generate",
         "dev": "tsc-watch --onSuccess \"node .\"",
-        "test": "tsc --build",
+        "test": "pnpm build",
         "prebuild": "pnpm clean && prisma generate",
         "build": "tsc --build",
         "clean": "rimraf dist",
