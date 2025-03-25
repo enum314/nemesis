@@ -27,7 +27,7 @@ export async function paginate(
       .setDisabled(true),
     new ButtonBuilder()
       .setEmoji("❌")
-      .setStyle(ButtonStyle.Secondary)
+      .setStyle(ButtonStyle.Primary)
       .setCustomId("terminate")
       .setDisabled(embeds.length === 1),
     new ButtonBuilder()
