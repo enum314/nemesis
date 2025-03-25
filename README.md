@@ -117,9 +117,14 @@ The template includes Pterodactyl egg files for deployment on Pterodactyl game s
    - **Additional Packages**: Install extra Node.js packages if needed
    - **Wipe Directory**: Option to clean installation directory
    - **Startup Command**: Customize how the application starts
+   - **GitHub Repository Settings**:
+     - **GitHub Username**: Username of the repository owner
+     - **GitHub Repository**: Name of the repository to clone
+     - **GitHub Branch**: Branch to use (default: main)
+     - **GitHub Personal Access Token**: For private repositories (optional)
 
 4. **After Installation**:
-   - The server will automatically install your Nemesis template
+   - The server will automatically install your project from the specified GitHub repository
    - It will configure the correct port in .env
    - The server will build and start automatically
 

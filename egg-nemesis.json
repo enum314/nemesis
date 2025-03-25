@@ -16,16 +16,16 @@
         "Node 20": "ghcr.io/parkervcp/yolks:nodejs_20"
     },
     "file_denylist": [],
-    "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then pnpm add -g ${NODE_PACKAGES}; fi; if [[ ! -d node_modules ]]; then pnpm install; fi; if [[ -f build.sh ]]; then chmod +x build.sh && ./build.sh; fi; if [[ ! -z ${ENVIRONMENT} ]]; then export NODE_ENV=${ENVIRONMENT}; fi; node .",
+    "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then pnpm add -g ${NODE_PACKAGES}; fi; if [[ ! -d node_modules ]]; then pnpm install; fi; if [[ -f build.sh ]]; then chmod +x build.sh && ./build.sh; fi; if [[ ! -z ${ENVIRONMENT} ]]; then export NODE_ENV=${ENVIRONMENT}; fi; {{STARTUP_CMD}}",
     "config": {
         "files": "{}",
-        "startup": "{\r\n    \"done\": \"Server started on port\"\r\n}",
+        "startup": "{\r\n    \"done\": \"Done!\"\r\n}",
         "logs": "{}",
         "stop": "^C"
     },
     "scripts": {
         "installation": {
-            "script": "#!\/bin\/bash\r\n# Nemesis Node.js Template Install Script\r\n#\r\n# Server Files: \/mnt\/server\r\napt update\r\napt install -y git curl\r\ncurl -fsSL https:\/\/get.pnpm.io\/install.sh | sh -\r\nSOURCE=\"https://github.com/enum314/nemesis.git\"\r\nBRANCH=\"main\"\r\nDEPLOY_DIR=\"/mnt/server\"\r\n\r\n# Make sure pterodactyl user can use pnpm\r\nexport PNPM_HOME=\"/usr/local/pnpm\"\r\nexport PATH=\"$PNPM_HOME:$PATH\"\r\npnpm config set store-dir /mnt/server/.pnpm-store\r\n\r\n# Clone or update repository\r\nif [ -d \"$DEPLOY_DIR/.git\" ]; then\r\n    cd \"$DEPLOY_DIR\"\r\n    git fetch origin\r\n    git reset --hard \"origin/$BRANCH\"\r\nelse\r\n    if [ -d \"$DEPLOY_DIR\" ]; then\r\n        if [ \"$(ls -A \"$DEPLOY_DIR\")\" ]; then\r\n            echo \"WARNING: Directory $DEPLOY_DIR is not empty\"\r\n            if [ \"$WIPE\" = \"1\" ]; then\r\n                echo \"Wiping directory...\"\r\n                rm -rf \"$DEPLOY_DIR\"\r\n                mkdir -p \"$DEPLOY_DIR\"\r\n            fi\r\n        fi\r\n    else\r\n        mkdir -p \"$DEPLOY_DIR\"\r\n    fi\r\n    \r\n    cd /tmp\r\n    git clone -b \"$BRANCH\" \"$SOURCE\" \"$DEPLOY_DIR\"\r\n    cd \"$DEPLOY_DIR\"\r\nfi\r\n\r\n# Setup environment\r\nif [ ! -f \"$DEPLOY_DIR/.env\" ]; then\r\n    if [ -f \"$DEPLOY_DIR/.env.example\" ]; then\r\n        cp \"$DEPLOY_DIR/.env.example\" \"$DEPLOY_DIR/.env\"\r\n        echo \"Created .env file from .env.example\"\r\n        # Update port in .env to match Pterodactyl's allocated port\r\n        sed -i \"s/PORT=.*/PORT={{server.build.default.port}}/g\" \"$DEPLOY_DIR/.env\"\r\n        echo \"Updated PORT in .env to {{server.build.default.port}}\"\r\n    else\r\n        echo \"Warning: No .env.example file found. Creating minimal .env file.\"\r\n        echo \"PORT={{server.build.default.port}}\" > \"$DEPLOY_DIR/.env\"\r\n        echo \"NODE_ENV=production\" >> \"$DEPLOY_DIR/.env\"\r\n    fi\r\nfi\r\n\r\n# Install dependencies\r\ncd \"$DEPLOY_DIR\"\r\npnpm install\r\n\r\n# Build the application\r\nif [ -f \"$DEPLOY_DIR/build.sh\" ]; then\r\n    chmod +x \"$DEPLOY_DIR/build.sh\"\r\n    ./build.sh\r\nelse\r\n    pnpm build\r\nfi\r\n\r\necho \"Installation complete.\"\r\necho \"Nemesis template has been installed.\"\r\necho \"Server will start on port {{server.build.default.port}} as configured in .env\"",
+            "script": "#!\/bin\/bash\r\n# Nemesis Node.js Template Install Script\r\n#\r\n# Server Files: \/mnt\/server\r\napt update\r\napt install -y git curl\r\ncurl -fsSL https:\/\/get.pnpm.io\/install.sh | sh -\r\n\r\n# Set repository variables from egg\r\nGITHUB_USER=\"${GITHUB_USERNAME:-enum314}\"\r\nREPOSITORY=\"${GITHUB_REPOSITORY:-nemesis}\"\r\nBRANCH=\"${GITHUB_BRANCH:-main}\"\r\nTOKEN=\"${GITHUB_TOKEN}\"\r\n\r\n# Construct the repository URL\r\nif [ -z \"$TOKEN\" ]; then\r\n    # Public repository\r\n    SOURCE=\"https://github.com/${GITHUB_USER}/${REPOSITORY}.git\"\r\nelse\r\n    # Private repository with token\r\n    SOURCE=\"https://${TOKEN}@github.com/${GITHUB_USER}/${REPOSITORY}.git\"\r\nfi\r\n\r\nDEPLOY_DIR=\"/mnt/server\"\r\n\r\n# Make sure pterodactyl user can use pnpm\r\nexport PNPM_HOME=\"/usr/local/pnpm\"\r\nexport PATH=\"$PNPM_HOME:$PATH\"\r\npnpm config set store-dir /mnt/server/.pnpm-store\r\n\r\necho \"Cloning from: ${GITHUB_USER}/${REPOSITORY} (branch: ${BRANCH})\"\r\n\r\n# Clone or update repository\r\nif [ -d \"$DEPLOY_DIR/.git\" ]; then\r\n    cd \"$DEPLOY_DIR\"\r\n    git fetch origin\r\n    git reset --hard \"origin/$BRANCH\"\r\nelse\r\n    if [ -d \"$DEPLOY_DIR\" ]; then\r\n        if [ \"$(ls -A \"$DEPLOY_DIR\")\" ]; then\r\n            echo \"WARNING: Directory $DEPLOY_DIR is not empty\"\r\n            if [ \"$WIPE\" = \"1\" ]; then\r\n                echo \"Wiping directory...\"\r\n                rm -rf \"$DEPLOY_DIR\"\r\n                mkdir -p \"$DEPLOY_DIR\"\r\n            fi\r\n        fi\r\n    else\r\n        mkdir -p \"$DEPLOY_DIR\"\r\n    fi\r\n    \r\n    cd /tmp\r\n    git clone -b \"$BRANCH\" \"$SOURCE\" \"$DEPLOY_DIR\"\r\n    cd \"$DEPLOY_DIR\"\r\nfi\r\n\r\n# Setup environment\r\nif [ ! -f \"$DEPLOY_DIR/.env\" ]; then\r\n    if [ -f \"$DEPLOY_DIR/.env.example\" ]; then\r\n        cp \"$DEPLOY_DIR/.env.example\" \"$DEPLOY_DIR/.env\"\r\n        echo \"Created .env file from .env.example\"\r\n        # Update port in .env to match Pterodactyl's allocated port\r\n        sed -i \"s/PORT=.*/PORT={{server.build.default.port}}/g\" \"$DEPLOY_DIR/.env\"\r\n        echo \"Updated PORT in .env to {{server.build.default.port}}\"\r\n    else\r\n        echo \"Warning: No .env.example file found. Creating minimal .env file.\"\r\n        echo \"PORT={{server.build.default.port}}\" > \"$DEPLOY_DIR/.env\"\r\n        echo \"NODE_ENV=production\" >> \"$DEPLOY_DIR/.env\"\r\n    fi\r\nfi\r\n\r\n# Install dependencies\r\ncd \"$DEPLOY_DIR\"\r\npnpm install\r\n\r\n# Build the application\r\nif [ -f \"$DEPLOY_DIR/build.sh\" ]; then\r\n    chmod +x \"$DEPLOY_DIR/build.sh\"\r\n    ./build.sh\r\nelse\r\n    pnpm build\r\nfi\r\n\r\necho \"Installation complete.\"\r\necho \"Project has been installed from ${GITHUB_USER}/${REPOSITORY}.\"\r\necho \"Server will start on port {{server.build.default.port}} as configured in .env\"",
             "container": "ghcr.io/parkervcp/installer:debian",
             "entrypoint": "bash"
         }
@@ -75,6 +75,42 @@
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|boolean"
+        },
+        {
+            "name": "GitHub Username",
+            "description": "The GitHub username for the repository to clone (leave default for template repository).",
+            "env_variable": "GITHUB_USERNAME",
+            "default_value": "enum314",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string"
+        },
+        {
+            "name": "GitHub Repository",
+            "description": "The GitHub repository name to clone (leave default for template repository).",
+            "env_variable": "GITHUB_REPOSITORY",
+            "default_value": "nemesis",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string"
+        },
+        {
+            "name": "GitHub Branch",
+            "description": "The branch to clone from the repository.",
+            "env_variable": "GITHUB_BRANCH",
+            "default_value": "main",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string"
+        },
+        {
+            "name": "GitHub Personal Access Token",
+            "description": "Personal access token for private repositories (leave empty for public repositories).",
+            "env_variable": "GITHUB_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string"
         }
     ]
 }

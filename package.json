@@ -80,6 +80,11 @@
                 1,
                 "always",
                 "pascal-case"
+            ],
+            "body-max-line-length": [
+                2,
+                "always",
+                200
             ]
         }
     },

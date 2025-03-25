@@ -24,7 +24,7 @@ startup: |
 config:
   files: {}
   startup:
-    done: "Server started on port"
+    done: "Done!"
   logs: {}
   stop: "^C"
 variables:
@@ -63,6 +63,34 @@ variables:
     user_viewable: true
     user_editable: true
     rules: required|boolean
+  - name: GitHub Username
+    description: The GitHub username for the repository to clone (leave default for template repository).
+    env_variable: GITHUB_USERNAME
+    default_value: "enum314"
+    user_viewable: true
+    user_editable: true
+    rules: required|string
+  - name: GitHub Repository
+    description: The GitHub repository name to clone (leave default for template repository).
+    env_variable: GITHUB_REPOSITORY
+    default_value: "nemesis"
+    user_viewable: true
+    user_editable: true
+    rules: required|string
+  - name: GitHub Branch
+    description: The branch to clone from the repository.
+    env_variable: GITHUB_BRANCH
+    default_value: "main"
+    user_viewable: true
+    user_editable: true
+    rules: required|string
+  - name: GitHub Personal Access Token
+    description: Personal access token for private repositories (leave empty for public repositories).
+    env_variable: GITHUB_TOKEN
+    default_value: ""
+    user_viewable: true
+    user_editable: true
+    rules: nullable|string
 install:
   script: |
     #!/bin/bash
@@ -72,14 +100,30 @@ install:
     apt update
     apt install -y git curl
     curl -fsSL https://get.pnpm.io/install.sh | sh -
-    SOURCE="https://github.com/enum314/nemesis.git"
-    BRANCH="main"
+
+    # Set repository variables from egg
+    GITHUB_USER="${GITHUB_USERNAME:-enum314}"
+    REPOSITORY="${GITHUB_REPOSITORY:-nemesis}"
+    BRANCH="${GITHUB_BRANCH:-main}"
+    TOKEN="${GITHUB_TOKEN}"
+
+    # Construct the repository URL
+    if [ -z "$TOKEN" ]; then
+        # Public repository
+        SOURCE="https://github.com/${GITHUB_USER}/${REPOSITORY}.git"
+    else
+        # Private repository with token
+        SOURCE="https://${TOKEN}@github.com/${GITHUB_USER}/${REPOSITORY}.git"
+    fi
+
     DEPLOY_DIR="/mnt/server"
 
     # Make sure pterodactyl user can use pnpm
     export PNPM_HOME="/usr/local/pnpm"
     export PATH="$PNPM_HOME:$PATH"
     pnpm config set store-dir /mnt/server/.pnpm-store
+
+    echo "Cloning from: ${GITHUB_USER}/${REPOSITORY} (branch: ${BRANCH})"
 
     # Clone or update repository
     if [ -d "$DEPLOY_DIR/.git" ]; then
@@ -133,5 +177,5 @@ install:
     fi
 
     echo "Installation complete."
-    echo "Nemesis template has been installed."
+    echo "Project has been installed from ${GITHUB_USER}/${REPOSITORY}."
     echo "Server will start on port {{server.build.default.port}} as configured in .env"
