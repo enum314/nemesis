@@ -13,7 +13,10 @@
         "build": "tsc --build",
         "clean": "rimraf dist",
         "lint": "eslint --fix \"src/**/*.ts\"",
-        "format": "prettier --write \"src/**/*.ts\""
+        "format": "prettier --write \"src/**/*.ts\"",
+        "v:patch": "npm version patch -m \"chore(release): %s\" --sign-git-tag",
+        "v:minor": "npm version minor -m \"chore(release): %s\" --sign-git-tag",
+        "v:major": "npm version major -m \"chore(release): %s\" --sign-git-tag"
     },
     "dependencies": {
         "@prisma/client": "6.5.0",
@@ -80,7 +83,7 @@
             "body-max-line-length": [
                 2,
                 "always",
-                200
+                500
             ]
         }
     },

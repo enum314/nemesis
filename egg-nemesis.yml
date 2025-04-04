@@ -5,23 +5,7 @@ exported_at: "2025-03-26T00:00:00+00:00"
 docker_image: ghcr.io/parkervcp/yolks:nodejs_22
 features:
   - docker
-startup: |
-  if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == "1" ]]; then 
-    git pull; 
-  fi; 
-  if [[ ! -z ${NODE_PACKAGES} ]]; then 
-    pnpm add -g ${NODE_PACKAGES}; 
-  fi; 
-  if [[ ! -d node_modules ]]; then 
-    pnpm install; 
-  fi; 
-  if [[ -f build.sh ]]; then 
-    chmod +x build.sh && ./build.sh; 
-  fi; 
-  if [[ ! -z ${ENVIRONMENT} ]]; then 
-    export NODE_ENV=${ENVIRONMENT}; 
-  fi; 
-  {{STARTUP_CMD}}
+startup: "{{STARTUP_CMD}}"
 config:
   files: {}
   startup:
@@ -36,52 +20,24 @@ variables:
     user_viewable: true
     user_editable: true
     rules: required|string
-  - name: Auto Update
-    description: Pull the latest changes from Git on startup.
-    env_variable: AUTO_UPDATE
-    default_value: "1"
-    user_viewable: true
-    user_editable: true
-    rules: required|boolean
-  - name: Node Environment
-    description: The Node environment to use.
-    env_variable: ENVIRONMENT
-    default_value: production
-    user_viewable: true
-    user_editable: true
-    rules: required|string|in:production,development,staging,test
-  - name: Additional Node Packages
-    description: Additional Node packages to install globally. Separate with spaces.
-    env_variable: NODE_PACKAGES
-    default_value: ""
-    user_viewable: true
-    user_editable: true
-    rules: nullable|string
-  - name: Wipe Directory on Install
-    description: Whether to wipe the directory when installing.
-    env_variable: WIPE
-    default_value: "0"
-    user_viewable: true
-    user_editable: true
-    rules: required|boolean
   - name: GitHub Username
-    description: The GitHub username for the repository to clone (leave default for template repository).
+    description: The GitHub username for the repository.
     env_variable: GITHUB_USERNAME
     default_value: "enum314"
     user_viewable: true
     user_editable: true
     rules: required|string
   - name: GitHub Repository
-    description: The GitHub repository name to clone (leave default for template repository).
+    description: The GitHub repository name.
     env_variable: GITHUB_REPOSITORY
     default_value: "nemesis"
     user_viewable: true
     user_editable: true
     rules: required|string
-  - name: GitHub Branch
-    description: The branch to clone from the repository.
-    env_variable: GITHUB_BRANCH
-    default_value: "main"
+  - name: GitHub Tag
+    description: The release tag to install (use 'latest' for the most recent release).
+    env_variable: GITHUB_TAG
+    default_value: "latest"
     user_viewable: true
     user_editable: true
     rules: required|string
@@ -99,23 +55,14 @@ install:
     #
     # Server Files: /mnt/server
     apt update
-    apt install -y git curl
+    apt install -y curl wget tar jq file unzip make gcc g++ python3 python3-dev python3-pip libtool
     curl -fsSL https://get.pnpm.io/install.sh | sh -
 
     # Set repository variables from egg
     GITHUB_USER="${GITHUB_USERNAME:-enum314}"
     REPOSITORY="${GITHUB_REPOSITORY:-nemesis}"
-    BRANCH="${GITHUB_BRANCH:-main}"
+    TAG="${GITHUB_TAG:-latest}"
     TOKEN="${GITHUB_TOKEN}"
-
-    # Construct the repository URL
-    if [ -z "$TOKEN" ]; then
-        # Public repository
-        SOURCE="https://github.com/${GITHUB_USER}/${REPOSITORY}.git"
-    else
-        # Private repository with token
-        SOURCE="https://${TOKEN}@github.com/${GITHUB_USER}/${REPOSITORY}.git"
-    fi
 
     DEPLOY_DIR="/mnt/server"
 
@@ -124,33 +71,67 @@ install:
     export PATH="$PNPM_HOME:$PATH"
     pnpm config set store-dir /mnt/server/.pnpm-store
 
-    echo "Cloning from: ${GITHUB_USER}/${REPOSITORY} (branch: ${BRANCH})"
-
-    # Clone or update repository
-    if [ -d "$DEPLOY_DIR/.git" ]; then
-        cd "$DEPLOY_DIR"
-        git fetch origin
-        git reset --hard "origin/$BRANCH"
-    else
-        if [ -d "$DEPLOY_DIR" ]; then
-            if [ "$(ls -A "$DEPLOY_DIR")" ]; then
-                echo "WARNING: Directory $DEPLOY_DIR is not empty"
-                if [ "$WIPE" = "1" ]; then
-                    echo "Wiping directory..."
-                    rm -rf "$DEPLOY_DIR"
-                    mkdir -p "$DEPLOY_DIR"
-                fi
-            fi
-        else
-            mkdir -p "$DEPLOY_DIR"
-        fi
-        
-        cd /tmp
-        git clone -b "$BRANCH" "$SOURCE" "$DEPLOY_DIR"
-        cd "$DEPLOY_DIR"
+    # Ensure deployment directory exists
+    if [ ! -d "$DEPLOY_DIR" ]; then
+        mkdir -p "$DEPLOY_DIR"
     fi
 
-    # Setup environment
+    # Download release tarball and checksum file
+    cd /tmp
+
+    # Construct the base release URL with token if provided
+    if [ -z "$TOKEN" ]; then
+        # Public repository
+        BASE_URL="https://github.com/${GITHUB_USER}/${REPOSITORY}/releases/download/${TAG}"
+        RELEASE_URL="${BASE_URL}/bot.tar.gz"
+        CHECKSUM_URL="${BASE_URL}/checksum.txt"
+    else
+        # Private repository with token
+        BASE_URL="https://${TOKEN}@github.com/${GITHUB_USER}/${REPOSITORY}/releases/download/${TAG}"
+        RELEASE_URL="${BASE_URL}/bot.tar.gz"
+        CHECKSUM_URL="${BASE_URL}/checksum.txt"
+    fi
+
+    echo "Downloading from: ${GITHUB_USER}/${REPOSITORY} (tag: ${TAG})"
+
+    # Download checksum file
+    echo "Downloading checksum file..."
+    wget -q --show-progress --header="Authorization: token ${TOKEN}" "$CHECKSUM_URL" -O checksum.txt
+    if [ $? -ne 0 ]; then
+        echo "Failed to download checksum file. Aborting installation."
+        exit 1
+    fi
+
+    # Download tarball
+    echo "Downloading release tarball..."
+    wget -q --show-progress --header="Authorization: token ${TOKEN}" "$RELEASE_URL" -O bot.tar.gz
+    if [ $? -ne 0 ]; then
+        echo "Failed to download release tarball. Aborting installation."
+        exit 1
+    fi
+
+    # Verify checksum
+    echo "Verifying file integrity..."
+    COMPUTED_CHECKSUM=$(sha256sum bot.tar.gz | awk '{print $1}')
+    EXPECTED_CHECKSUM=$(cat checksum.txt | awk '{print $1}')
+
+    if [ "$COMPUTED_CHECKSUM" != "$EXPECTED_CHECKSUM" ]; then
+        echo "Checksum verification failed!"
+        echo "Expected: $EXPECTED_CHECKSUM"
+        echo "Got: $COMPUTED_CHECKSUM"
+        echo "The downloaded file may be corrupted or tampered with. Aborting installation."
+        rm bot.tar.gz checksum.txt
+        exit 1
+    fi
+
+    echo "Checksum verification successful!"
+
+    # Extract to server directory
+    echo "Extracting files..."
+    tar -xzf bot.tar.gz -C "$DEPLOY_DIR"
+    rm bot.tar.gz checksum.txt
+
+    # Setup environment file
     if [ ! -f "$DEPLOY_DIR/.env" ]; then
         if [ -f "$DEPLOY_DIR/.env.example" ]; then
             cp "$DEPLOY_DIR/.env.example" "$DEPLOY_DIR/.env"
@@ -165,18 +146,5 @@ install:
         fi
     fi
 
-    # Install dependencies
-    cd "$DEPLOY_DIR"
-    pnpm install
-
-    # Build the application
-    if [ -f "$DEPLOY_DIR/build.sh" ]; then
-        chmod +x "$DEPLOY_DIR/build.sh"
-        ./build.sh
-    else
-        pnpm build
-    fi
-
-    echo "Installation complete."
-    echo "Project has been installed from ${GITHUB_USER}/${REPOSITORY}."
+    echo "Release has been installed from ${GITHUB_USER}/${REPOSITORY} (tag: ${TAG})."
     echo "Server will start on port {{server.build.default.port}} as configured in .env"
