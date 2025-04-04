@@ -32,7 +32,7 @@ jobs:
   lint:
     needs: pre_ci
     runs-on: ubuntu-latest
-    if: "(!contains(needs.pre_ci.outputs.commit_message, '[skip lint]'))"
+    if: "(!contains(needs.pre_ci.outputs.commit_message, '[skip lint]') && !contains(needs.pre_ci.outputs.commit_message, 'chore(release): '))"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -61,7 +61,7 @@ jobs:
   test:
     needs: pre_ci
     runs-on: ubuntu-latest
-    if: "(!contains(needs.pre_ci.outputs.commit_message, '[skip test]'))"
+    if: "(!contains(needs.pre_ci.outputs.commit_message, '[skip test]') && !contains(needs.pre_ci.outputs.commit_message, 'chore(release): '))"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
