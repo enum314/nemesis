@@ -1,8 +1,11 @@
 name: Nemesis
-author: enum314
+author: enum314@gmail.com
 description: A modern Node.js application template with Docker configuration and GitHub workflows.
 exported_at: "2025-03-26T00:00:00+00:00"
-docker_image: ghcr.io/parkervcp/yolks:nodejs_22
+docker_image: ghcr.io/ptero-eggs/yolks:nodejs_22
+docker_images:
+  Node 22: ghcr.io/ptero-eggs/yolks:nodejs_22
+  Node 20: ghcr.io/ptero-eggs/yolks:nodejs_20
 features:
   - docker
 startup: "{{STARTUP_CMD}}"
@@ -20,6 +23,7 @@ variables:
     user_viewable: true
     user_editable: true
     rules: required|string
+    field_type: text
   - name: GitHub Username
     description: The GitHub username for the repository.
     env_variable: GITHUB_USERNAME
@@ -27,6 +31,7 @@ variables:
     user_viewable: true
     user_editable: true
     rules: required|string
+    field_type: text
   - name: GitHub Repository
     description: The GitHub repository name.
     env_variable: GITHUB_REPOSITORY
@@ -34,13 +39,15 @@ variables:
     user_viewable: true
     user_editable: true
     rules: required|string
+    field_type: text
   - name: GitHub Tag
-    description: The release tag to install (use 'latest' for the most recent release).
+    description: "The release tag to install (use 'latest' for the most recent release)."
     env_variable: GITHUB_TAG
     default_value: "latest"
     user_viewable: true
     user_editable: true
     rules: required|string
+    field_type: text
   - name: GitHub Personal Access Token
     description: Personal access token for private repositories (leave empty for public repositories).
     env_variable: GITHUB_TOKEN
@@ -48,6 +55,7 @@ variables:
     user_viewable: true
     user_editable: true
     rules: nullable|string
+    field_type: text
 install:
   script: |
     #!/bin/bash
@@ -56,7 +64,7 @@ install:
     # Server Files: /mnt/server
     apt update
     apt install -y curl wget tar jq file unzip make gcc g++ python3 python3-dev python3-pip libtool
-    curl -fsSL https://get.pnpm.io/install.sh | sh -
+    wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.bashrc" SHELL="$(which bash)" bash -
 
     # Set repository variables from egg
     GITHUB_USER="${GITHUB_USERNAME:-enum314}"
@@ -80,23 +88,39 @@ install:
     cd /tmp
 
     # Construct the base release URL with token if provided
-    if [ -z "$TOKEN" ]; then
-        # Public repository
-        BASE_URL="https://github.com/${GITHUB_USER}/${REPOSITORY}/releases/download/${TAG}"
-        RELEASE_URL="${BASE_URL}/bot.tar.gz"
-        CHECKSUM_URL="${BASE_URL}/checksum.txt"
+    if [ "$TAG" = "latest" ]; then
+        # Using latest release URL format
+        if [ -z "$TOKEN" ]; then
+            # Public repository
+            BASE_URL="https://github.com/${GITHUB_USER}/${REPOSITORY}/releases/latest/download"
+        else
+            # Private repository with token
+            BASE_URL="https://${TOKEN}@github.com/${GITHUB_USER}/${REPOSITORY}/releases/latest/download"
+        fi
     else
-        # Private repository with token
-        BASE_URL="https://${TOKEN}@github.com/${GITHUB_USER}/${REPOSITORY}/releases/download/${TAG}"
-        RELEASE_URL="${BASE_URL}/bot.tar.gz"
-        CHECKSUM_URL="${BASE_URL}/checksum.txt"
+        # Using specific tag release URL format
+        if [ -z "$TOKEN" ]; then
+            # Public repository
+            BASE_URL="https://github.com/${GITHUB_USER}/${REPOSITORY}/releases/download/${TAG}"
+        else
+            # Private repository with token
+            BASE_URL="https://${TOKEN}@github.com/${GITHUB_USER}/${REPOSITORY}/releases/download/${TAG}"
+        fi
     fi
+
+    RELEASE_URL="${BASE_URL}/bot.tar.gz"
+    CHECKSUM_URL="${BASE_URL}/checksum.txt"
 
     echo "Downloading from: ${GITHUB_USER}/${REPOSITORY} (tag: ${TAG})"
 
     # Download checksum file
     echo "Downloading checksum file..."
-    wget -q --show-progress --header="Authorization: token ${TOKEN}" "$CHECKSUM_URL" -O checksum.txt
+    if [ -z "$TOKEN" ]; then
+        wget -q --show-progress "$CHECKSUM_URL" -O checksum.txt
+    else
+        wget -q --show-progress --header="Authorization: token ${TOKEN}" "$CHECKSUM_URL" -O checksum.txt
+    fi
+
     if [ $? -ne 0 ]; then
         echo "Failed to download checksum file. Aborting installation."
         exit 1
@@ -104,7 +128,12 @@ install:
 
     # Download tarball
     echo "Downloading release tarball..."
-    wget -q --show-progress --header="Authorization: token ${TOKEN}" "$RELEASE_URL" -O bot.tar.gz
+    if [ -z "$TOKEN" ]; then
+        wget -q --show-progress "$RELEASE_URL" -O bot.tar.gz
+    else
+        wget -q --show-progress --header="Authorization: token ${TOKEN}" "$RELEASE_URL" -O bot.tar.gz
+    fi
+
     if [ $? -ne 0 ]; then
         echo "Failed to download release tarball. Aborting installation."
         exit 1
@@ -148,3 +177,7 @@ install:
 
     echo "Release has been installed from ${GITHUB_USER}/${REPOSITORY} (tag: ${TAG})."
     echo "Server will start on port {{server.build.default.port}} as configured in .env"
+
+    exit 0
+  container: ghcr.io/ptero-eggs/installers:debian
+  entrypoint: bash
