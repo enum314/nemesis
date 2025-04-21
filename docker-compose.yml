@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   # Development service
   app-dev:
@@ -17,6 +15,8 @@ services:
       - PORT=3001
     command: pnpm dev
     restart: unless-stopped
+    depends_on:
+      - mysql
 
   # Production service
   app-prod:
@@ -31,20 +31,17 @@ services:
       - PORT=3001
     restart: unless-stopped
 
-  # You might need additional services like databases
-  # Example for a PostgreSQL database:
-  # db:
-  #   image: postgres:16-alpine
-  #   container_name: nemesis-db
-  #   environment:
-  #     - POSTGRES_USER=postgres
-  #     - POSTGRES_PASSWORD=postgres
-  #     - POSTGRES_DB=nemesis
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-  #   ports:
-  #     - "5432:5432"
-  #   restart: unless-stopped
-# Uncomment if using the database service
-# volumes:
-#   postgres_data:
+  # MySQL service for development
+  mysql:
+    image: mysql:8.0
+    container_name: nemesis-mysql-dev
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=nemesis
+      - MYSQL_USER=nemesis
+      - MYSQL_PASSWORD=nemesis
+    volumes:
+      - ./data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    restart: unless-stopped

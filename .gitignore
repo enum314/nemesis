@@ -7,3 +7,4 @@ configs/*.json
 configs/*.yml
 tsconfig.tsbuildinfo
 cache.json
+data/

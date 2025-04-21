@@ -9,8 +9,10 @@ generator client {
 }
 
 datasource db {
-    provider = "sqlite"
-    url      = env("DATABASE_URL")
+    provider          = "mysql"
+    url               = env("DATABASE_URL")
+    relationMode      = "foreignKeys"
+    shadowDatabaseUrl = env("SHADOW_DATABASE_URL") // Optional: Used for migrations
 }
 
 model User {
@@ -18,4 +20,6 @@ model User {
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@index([id])
 }
