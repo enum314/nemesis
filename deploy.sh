@@ -23,7 +23,7 @@ print_style() {
 # Default values
 GITHUB_USER="enum314"
 REPOSITORY="nemesis"
-BRANCH="main"
+TAG="latest"
 GITHUB_TOKEN=""
 APP_PATH="/opt/nemesis"
 FIRST_RUN=false
@@ -44,7 +44,13 @@ while [[ "$#" -gt 0 ]]; do
         shift
         ;;
     --branch)
-        BRANCH="$2"
+        # Keep branch parameter for backward compatibility
+        print_style "Warning: --branch parameter is deprecated. Use --tag instead.\n" "warning"
+        TAG="$2"
+        shift
+        ;;
+    --tag)
+        TAG="$2"
         shift
         ;;
     --path)
@@ -72,9 +78,10 @@ while [[ "$#" -gt 0 ]]; do
         echo "Options:"
         echo "  --github-user USER GitHub username (default: $GITHUB_USER)"
         echo "  --repository REPO  Repository name (default: $REPOSITORY)"
+        echo "  --tag TAG         Release tag to deploy (default: latest)"
         echo "  --token TOKEN     GitHub personal access token for private repos"
         echo "  --repo URL        Git repository URL (legacy, use github-user and repository instead)"
-        echo "  --branch NAME     Branch to deploy (default: $BRANCH)"
+        echo "  --branch NAME     Branch to deploy (deprecated, use --tag instead)"
         echo "  --path PATH       Installation path (default: $APP_PATH)"
         echo "  --first-run       Perform first-time setup"
         echo "  --force-rebuild   Force rebuild of Docker containers"
@@ -102,7 +109,7 @@ if [ -z "$REPO_URL" ]; then
     fi
 fi
 
-print_style "Repository URL: $REPO_URL (branch: $BRANCH)\n" "info"
+print_style "Repository URL: $REPO_URL (tag: $TAG)\n" "info"
 
 # Check if Docker is installed
 if ! command -v docker &>/dev/null; then
@@ -112,8 +119,8 @@ if ! command -v docker &>/dev/null; then
 fi
 
 # Check if Docker Compose is installed
-if ! command -v docker-compose &>/dev/null; then
-    print_style "Error: Docker Compose is not installed. Please install Docker Compose first.\n" "danger"
+if ! docker compose version &>/dev/null; then
+    print_style "Error: Docker Compose is not installed or not available. Please install Docker Compose first.\n" "danger"
     print_style "Visit https://docs.docker.com/compose/install/ for installation instructions.\n" "info"
     exit 1
 fi
@@ -124,13 +131,92 @@ if ! docker info >/dev/null 2>&1; then
     exit 1
 fi
 
-# Check if Git is installed
-if ! command -v git &>/dev/null; then
-    print_style "Error: Git is not installed. Please install Git first.\n" "danger"
+# Check if jq is installed (needed for API parsing)
+if ! command -v jq &>/dev/null; then
+    print_style "Error: jq is not installed. Please install jq first.\n" "danger"
+    print_style "You can install it with: apt-get install jq (Debian/Ubuntu) or brew install jq (MacOS).\n" "info"
     exit 1
 fi
 
-# Clone or update repository
+# Create temp directory for downloads
+TEMP_DIR=$(mktemp -d)
+trap 'rm -rf "$TEMP_DIR"' EXIT
+
+print_style "Downloading from: ${GITHUB_USER}/${REPOSITORY} (tag: ${TAG})\n" "info"
+
+# Decide API URL
+RELEASE_API_URL="https://api.github.com/repos/${GITHUB_USER}/${REPOSITORY}/releases"
+if [ "$TAG" = "latest" ]; then
+    RELEASE_API_URL="${RELEASE_API_URL}/latest"
+else
+    RELEASE_API_URL="${RELEASE_API_URL}/tags/${TAG}"
+fi
+
+# Download logic for PRIVATE repos (token provided)
+if [ -n "$GITHUB_TOKEN" ]; then
+    print_style "Token detected. Using GitHub API for private release assets...\n" "info"
+
+    RELEASE_DATA=$(curl -s -H "Authorization: Bearer ${GITHUB_TOKEN}" "$RELEASE_API_URL")
+
+    BOT_ASSET_ID=$(echo "$RELEASE_DATA" | jq '.assets[] | select(.name == "bot.tar.gz") | .id')
+    CHECKSUM_ASSET_ID=$(echo "$RELEASE_DATA" | jq '.assets[] | select(.name == "checksum.txt") | .id')
+
+    if [ -z "$BOT_ASSET_ID" ] || [ -z "$CHECKSUM_ASSET_ID" ]; then
+        print_style "Error: Could not find required release assets.\n" "danger"
+        exit 1
+    fi
+
+    print_style "Downloading checksum.txt...\n" "info"
+    curl -sL -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+        -H "Accept: application/octet-stream" \
+        "https://api.github.com/repos/${GITHUB_USER}/${REPOSITORY}/releases/assets/${CHECKSUM_ASSET_ID}" \
+        -o "$TEMP_DIR/checksum.txt"
+
+    print_style "Downloading bot.tar.gz...\n" "info"
+    curl -sL -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+        -H "Accept: application/octet-stream" \
+        "https://api.github.com/repos/${GITHUB_USER}/${REPOSITORY}/releases/assets/${BOT_ASSET_ID}" \
+        -o "$TEMP_DIR/bot.tar.gz"
+
+else
+    # Public repo fallback
+    print_style "No token provided. Assuming public release access.\n" "info"
+
+    if [ "$TAG" = "latest" ]; then
+        BASE_URL="https://github.com/${GITHUB_USER}/${REPOSITORY}/releases/latest/download"
+    else
+        BASE_URL="https://github.com/${GITHUB_USER}/${REPOSITORY}/releases/download/${TAG}"
+    fi
+
+    print_style "Downloading checksum.txt from public release...\n" "info"
+    curl -sL "${BASE_URL}/checksum.txt" -o "$TEMP_DIR/checksum.txt"
+
+    print_style "Downloading bot.tar.gz from public release...\n" "info"
+    curl -sL "${BASE_URL}/bot.tar.gz" -o "$TEMP_DIR/bot.tar.gz"
+fi
+
+# Validate downloads
+if [ ! -f "$TEMP_DIR/bot.tar.gz" ] || [ ! -f "$TEMP_DIR/checksum.txt" ]; then
+    print_style "Download failed. One or more files are missing.\n" "danger"
+    exit 1
+fi
+
+# Verify checksum
+print_style "Verifying file integrity...\n" "info"
+COMPUTED_CHECKSUM=$(sha256sum "$TEMP_DIR/bot.tar.gz" | awk '{print $1}')
+EXPECTED_CHECKSUM=$(cat "$TEMP_DIR/checksum.txt" | awk '{print $1}')
+
+if [ "$COMPUTED_CHECKSUM" != "$EXPECTED_CHECKSUM" ]; then
+    print_style "Checksum verification failed!\n" "danger"
+    print_style "Expected: $EXPECTED_CHECKSUM\n" "danger"
+    print_style "Got: $COMPUTED_CHECKSUM\n" "danger"
+    print_style "The downloaded file may be corrupted or tampered with. Aborting installation.\n" "danger"
+    exit 1
+fi
+
+print_style "Checksum verification successful!\n" "success"
+
+# Handle first run or update mode
 if [ "$FIRST_RUN" = true ] || [ ! -d "$APP_PATH" ]; then
     if [ -d "$APP_PATH" ]; then
         print_style "Warning: Directory $APP_PATH already exists but --first-run was specified.\n" "warning"
@@ -145,56 +231,50 @@ if [ "$FIRST_RUN" = true ] || [ ! -d "$APP_PATH" ]; then
         fi
     fi
 
-    print_style "Cloning repository $REPO_URL (branch: $BRANCH)...\n" "info"
-    git clone -b "$BRANCH" "$REPO_URL" "$APP_PATH"
-    cd "$APP_PATH"
+    # Create app directory
+    mkdir -p "$APP_PATH"
+
+    # Extract release to app directory
+    print_style "Extracting files...\n" "info"
+    tar -xzf "$TEMP_DIR/bot.tar.gz" -C "$APP_PATH"
     FORCE_REBUILD=true
 else
     # This is an update
-    if [ ! -d "$APP_PATH/.git" ]; then
-        print_style "Error: $APP_PATH is not a Git repository.\n" "danger"
-        exit 1
-    fi
+    if [ "$UPDATE_MODE" = true ]; then
+        print_style "Updating existing installation...\n" "info"
 
-    cd "$APP_PATH"
-    print_style "Fetching latest changes from repository...\n" "info"
+        # Create a backup of the current application
+        BACKUP_DIR="$APP_PATH-backup-$(date +%Y%m%d%H%M%S)"
+        print_style "Creating backup at $BACKUP_DIR...\n" "info"
+        cp -a "$APP_PATH" "$BACKUP_DIR"
 
-    # Save current HEAD commit hash
-    OLD_COMMIT=$(git rev-parse HEAD)
-
-    # Update the origin URL if it has changed
-    git remote set-url origin "$REPO_URL"
-
-    # Try to pull changes
-    git fetch origin "$BRANCH"
-    git checkout "$BRANCH"
-    git reset --hard "origin/$BRANCH"
-
-    # Get new HEAD commit hash
-    NEW_COMMIT=$(git rev-parse HEAD)
-
-    if [ "$OLD_COMMIT" == "$NEW_COMMIT" ]; then
-        print_style "Already up to date. No changes detected.\n" "success"
-        if [ "$FORCE_REBUILD" != true ]; then
-            print_style "If you want to rebuild anyway, use --force-rebuild flag.\n" "info"
-            if [ "$UPDATE_MODE" = true ]; then
-                exit 0
-            fi
+        # Stop existing containers if any
+        if docker compose -f "$APP_PATH/docker-compose.yml" ps 2>/dev/null | grep -q "Up"; then
+            print_style "Stopping existing containers...\n" "info"
+            docker compose -f "$APP_PATH/docker-compose.yml" down
         fi
+
+        # Extract the new release, but preserve .env
+        if [ -f "$APP_PATH/.env" ]; then
+            print_style "Preserving existing .env file...\n" "info"
+            cp "$APP_PATH/.env" "$TEMP_DIR/.env.backup"
+        fi
+
+        # Extract release over existing directory
+        print_style "Extracting update...\n" "info"
+        tar -xzf "$TEMP_DIR/bot.tar.gz" -C "$APP_PATH"
+
+        # Restore .env file
+        if [ -f "$TEMP_DIR/.env.backup" ]; then
+            print_style "Restoring .env file...\n" "info"
+            cp "$TEMP_DIR/.env.backup" "$APP_PATH/.env"
+        fi
+
+        FORCE_REBUILD=true
     else
-        print_style "Repository updated from $OLD_COMMIT to $NEW_COMMIT\n" "success"
-
-        # Check for changes in package.json (dependencies)
-        if git diff --name-only "$OLD_COMMIT" "$NEW_COMMIT" | grep -q "package.json\|pnpm-lock.yaml"; then
-            print_style "Dependencies changed.\n" "info"
-            FORCE_REBUILD=true
-        fi
-
-        # Check for changes in Dockerfile or docker-compose.yml
-        if git diff --name-only "$OLD_COMMIT" "$NEW_COMMIT" | grep -q "Dockerfile\|docker-compose.yml"; then
-            print_style "Docker configuration changed.\n" "info"
-            FORCE_REBUILD=true
-        fi
+        print_style "Error: Directory $APP_PATH exists but --update or --first-run not specified.\n" "danger"
+        print_style "Use --update to update an existing installation or --first-run to start fresh.\n" "info"
+        exit 1
     fi
 fi
 
@@ -217,41 +297,35 @@ fi
 if [ "$FORCE_REBUILD" = true ]; then
     print_style "\nRebuilding and restarting containers...\n" "info"
 
-    # Stop existing containers if any
-    if docker-compose -f "$APP_PATH/docker-compose.yml" ps 2>/dev/null | grep -q "Up"; then
-        print_style "Stopping existing containers...\n" "info"
-        docker-compose -f "$APP_PATH/docker-compose.yml" down
-    fi
-
     # Build and start containers
     print_style "Building and starting containers...\n" "info"
-    docker-compose -f "$APP_PATH/docker-compose.yml" up -d --build app-prod
+    docker compose -f "$APP_PATH/docker-compose.yml" up -d --build app-prod
 else
     print_style "\nRestarting containers with updated code...\n" "info"
 
     # Check if containers are running
-    if docker-compose -f "$APP_PATH/docker-compose.yml" ps 2>/dev/null | grep -q "Up"; then
+    if docker compose -f "$APP_PATH/docker-compose.yml" ps 2>/dev/null | grep -q "Up"; then
         print_style "Restarting existing containers...\n" "info"
-        docker-compose -f "$APP_PATH/docker-compose.yml" restart app-prod
+        docker compose -f "$APP_PATH/docker-compose.yml" restart app-prod
     else
         print_style "Starting containers...\n" "info"
-        docker-compose -f "$APP_PATH/docker-compose.yml" up -d app-prod
+        docker compose -f "$APP_PATH/docker-compose.yml" up -d app-prod
     fi
 fi
 
 # Check if the containers are running
-if docker-compose -f "$APP_PATH/docker-compose.yml" ps | grep -q "app-prod.*Up"; then
+if docker compose -f "$APP_PATH/docker-compose.yml" ps | grep -q "app-prod.*Up"; then
     print_style "\nDeployment completed successfully! Containers are running.\n" "success"
 
     # Show logs if requested
     if [ "$SHOW_LOGS" = true ]; then
         print_style "\nShowing logs (press Ctrl+C to exit):\n" "info"
         print_style "=============================================\n\n" "info"
-        docker-compose -f "$APP_PATH/docker-compose.yml" logs --follow app-prod
+        docker compose -f "$APP_PATH/docker-compose.yml" logs --follow app-prod
     fi
 else
     print_style "Error: Containers failed to start after deployment.\n" "danger"
-    print_style "Check the logs with: docker-compose -f \"$APP_PATH/docker-compose.yml\" logs app-prod\n" "info"
+    print_style "Check the logs with: docker compose -f \"$APP_PATH/docker-compose.yml\" logs app-prod\n" "info"
     exit 1
 fi
 
@@ -260,7 +334,7 @@ print_style "\n=============================================\n" "success"
 print_style "The application is now running at: http://localhost:3001\n" "success"
 print_style "=============================================\n" "success"
 print_style "\nTo update the application in the future, run:\n" "info"
-print_style "$0 --update --path $APP_PATH --github-user $GITHUB_USER --repository $REPOSITORY\n\n" "info"
+print_style "$0 --update --path $APP_PATH --github-user $GITHUB_USER --repository $REPOSITORY --tag latest\n\n" "info"
 
 # Create a convenience script for updates if it doesn't exist
 UPDATE_SCRIPT="$APP_PATH/update-app.sh"
@@ -269,7 +343,7 @@ if [ ! -f "$UPDATE_SCRIPT" ]; then
 
     cat >"$UPDATE_SCRIPT" <<EOL
 #!/bin/bash
-$(realpath $0) --update --path $APP_PATH --github-user $GITHUB_USER --repository $REPOSITORY \$@
+$(realpath $0) --update --path $APP_PATH --github-user $GITHUB_USER --repository $REPOSITORY --tag latest \$@
 EOL
 
     chmod +x "$UPDATE_SCRIPT"
