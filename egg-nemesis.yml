@@ -87,57 +87,65 @@ install:
     # Download release tarball and checksum file
     cd /tmp
 
-    # Construct the base release URL with token if provided
-    if [ "$TAG" = "latest" ]; then
-        # Using latest release URL format
-        if [ -z "$TOKEN" ]; then
-            # Public repository
-            BASE_URL="https://github.com/${GITHUB_USER}/${REPOSITORY}/releases/latest/download"
-        else
-            # Private repository with token
-            BASE_URL="https://${TOKEN}@github.com/${GITHUB_USER}/${REPOSITORY}/releases/latest/download"
-        fi
-    else
-        # Using specific tag release URL format
-        if [ -z "$TOKEN" ]; then
-            # Public repository
-            BASE_URL="https://github.com/${GITHUB_USER}/${REPOSITORY}/releases/download/${TAG}"
-        else
-            # Private repository with token
-            BASE_URL="https://${TOKEN}@github.com/${GITHUB_USER}/${REPOSITORY}/releases/download/${TAG}"
-        fi
-    fi
-
-    RELEASE_URL="${BASE_URL}/bot.tar.gz"
-    CHECKSUM_URL="${BASE_URL}/checksum.txt"
-
     echo "Downloading from: ${GITHUB_USER}/${REPOSITORY} (tag: ${TAG})"
 
-    # Download checksum file
-    echo "Downloading checksum file..."
-    if [ -z "$TOKEN" ]; then
-        wget -q --show-progress "$CHECKSUM_URL" -O checksum.txt
+    # Decide API URL
+    RELEASE_API_URL="https://api.github.com/repos/${GITHUB_USER}/${REPOSITORY}/releases"
+    if [ "$TAG" = "latest" ]; then
+        RELEASE_API_URL="${RELEASE_API_URL}/latest"
     else
-        wget -q --show-progress --header="Authorization: token ${TOKEN}" "$CHECKSUM_URL" -O checksum.txt
+        RELEASE_API_URL="${RELEASE_API_URL}/tags/${TAG}"
     fi
 
-    if [ $? -ne 0 ]; then
-        echo "Failed to download checksum file. Aborting installation."
+    # Download logic for PRIVATE repos (token provided)
+    if [ -n "$TOKEN" ]; then
+        echo "Token detected. Using GitHub API for private release assets..."
+
+        RELEASE_DATA=$(curl -s -H "Authorization: Bearer ${TOKEN}" "$RELEASE_API_URL")
+
+        BOT_ASSET_ID=$(echo "$RELEASE_DATA" | jq '.assets[] | select(.name == "bot.tar.gz") | .id')
+        CHECKSUM_ASSET_ID=$(echo "$RELEASE_DATA" | jq '.assets[] | select(.name == "checksum.txt") | .id')
+
+        if [ -z "$BOT_ASSET_ID" ] || [ -z "$CHECKSUM_ASSET_ID" ]; then
+            echo "Error: Could not find required release assets."
+            exit 1
+        fi
+
+        echo "Downloading checksum.txt..."
+        curl -sL -H "Authorization: Bearer ${TOKEN}" \
+            -H "Accept: application/octet-stream" \
+            "https://api.github.com/repos/${GITHUB_USER}/${REPOSITORY}/releases/assets/${CHECKSUM_ASSET_ID}" \
+            -o checksum.txt
+
+        echo "Downloading bot.tar.gz..."
+        curl -sL -H "Authorization: Bearer ${TOKEN}" \
+            -H "Accept: application/octet-stream" \
+            "https://api.github.com/repos/${GITHUB_USER}/${REPOSITORY}/releases/assets/${BOT_ASSET_ID}" \
+            -o bot.tar.gz
+
+    else
+        # Public repo fallback
+        echo "No token provided. Assuming public release access."
+
+        if [ "$TAG" = "latest" ]; then
+            BASE_URL="https://github.com/${GITHUB_USER}/${REPOSITORY}/releases/latest/download"
+        else
+            BASE_URL="https://github.com/${GITHUB_USER}/${REPOSITORY}/releases/download/${TAG}"
+        fi
+
+        echo "Downloading checksum.txt from public release..."
+        wget -q --show-progress "${BASE_URL}/checksum.txt" -O checksum.txt
+
+        echo "Downloading bot.tar.gz from public release..."
+        wget -q --show-progress "${BASE_URL}/bot.tar.gz" -O bot.tar.gz
+    fi
+
+    # Validate downloads
+    if [ ! -f bot.tar.gz ] || [ ! -f checksum.txt ]; then
+        echo "Download failed. One or more files are missing."
         exit 1
     fi
 
-    # Download tarball
-    echo "Downloading release tarball..."
-    if [ -z "$TOKEN" ]; then
-        wget -q --show-progress "$RELEASE_URL" -O bot.tar.gz
-    else
-        wget -q --show-progress --header="Authorization: token ${TOKEN}" "$RELEASE_URL" -O bot.tar.gz
-    fi
-
-    if [ $? -ne 0 ]; then
-        echo "Failed to download release tarball. Aborting installation."
-        exit 1
-    fi
 
     # Verify checksum
     echo "Verifying file integrity..."
