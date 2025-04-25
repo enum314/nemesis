@@ -8,8 +8,7 @@
             "name": "Docker Development",
             "type": "node-terminal",
             "request": "launch",
-            "command": "docker compose up app-dev",
-            "postDebugTask": "docker-compose-down",
+            "command": "pnpm dev",
             "presentation": {
                 "hidden": false,
                 "group": "development",

@@ -1,23 +1,4 @@
 services:
-  # Development service
-  nemesis:
-    build:
-      context: .
-      target: development
-    container_name: nemesis-dev
-    volumes:
-      - .:/app
-      - /app/node_modules
-    ports:
-      - "3001:3001"
-    environment:
-      - NODE_ENV=development
-      - PORT=3001
-    command: pnpm dev
-    restart: unless-stopped
-    depends_on:
-      - mysql
-
   # MySQL service for development
   mysql:
     image: mysql:8.4
@@ -28,7 +9,11 @@ services:
       - MYSQL_USER=nemesis
       - MYSQL_PASSWORD=nemesis
     volumes:
-      - ./data:/var/lib/mysql
+      - mysql-data:/var/lib/mysql
     ports:
       - "3306:3306"
     restart: unless-stopped
+
+volumes:
+  mysql-data:
+    driver: local

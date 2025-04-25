@@ -38,7 +38,7 @@
         "@types/express": "^5.0.1",
         "@types/ms": "^2.1.0",
         "@types/mustache": "^4.2.5",
-        "@types/node": "^22.14.1",
+        "@types/node": "^22.15.2",
         "@typescript-eslint/eslint-plugin": "^8.31.0",
         "@typescript-eslint/parser": "^8.31.0",
         "eslint": "^9.25.1",
@@ -87,7 +87,7 @@
             ]
         }
     },
-    "packageManager": "pnpm@10.5.0+sha512.11106a5916c7406fe4b8cb8e3067974b8728f47308a4f5ac5e850304afa6f57e2847d7950dfe78877d8d36bfb401d381c4215db3a4c3547ffa63c14333a6fa51",
+    "packageManager": "pnpm@10.9.0",
     "pnpm": {
         "onlyBuiltDependencies": [
             "@prisma/client",
