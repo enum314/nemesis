@@ -54,10 +54,10 @@ export type InhibitorFunction = (
 
 ### Creating an Inhibitor
 
-You can create and register inhibitors in the `src/inhibitors/index.ts` file:
+You can create and register inhibitors in the `src/functions/inhibitors.ts` file:
 
 ```typescript
-// src/inhibitors/index.ts
+// src/functions/inhibitors.ts
 import type { InhibitorFunction } from "../utils/types.js";
 
 // Create a cooldown inhibitor
