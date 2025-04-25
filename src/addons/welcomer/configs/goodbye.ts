@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Configuration } from "../../../lib/configuration.js";
+import { Configuration } from "#lib/configuration";
 
 // Define schema for goodbye configuration
 const goodbyeConfigSchema = z

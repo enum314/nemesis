@@ -1,8 +1,8 @@
 import type { ClientEvents } from "discord.js";
 
-import { Configuration } from "../lib/configuration.js";
-import { Command } from "./command.js";
-import { Event } from "./event.js";
+import { Command } from "#classes/command";
+import { Event } from "#classes/event";
+import { Configuration } from "#lib/configuration";
 
 export interface AddonOptions {
   id: string;

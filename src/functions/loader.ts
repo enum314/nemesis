@@ -1,11 +1,11 @@
 import type { ClientEvents } from "discord.js";
 
-import { Addon, type AddonOptions } from "../classes/addon.js";
-import { Command } from "../classes/command.js";
-import { Event } from "../classes/event.js";
-import client, { isShardProcess } from "../index.js";
-import { Configuration } from "../lib/configuration.js";
-import { getAllFiles } from "../utils/file-loader.js";
+import { Addon, type AddonOptions } from "#classes/addon";
+import { Command } from "#classes/command";
+import { Event } from "#classes/event";
+import { Configuration } from "#lib/configuration";
+import client, { isShardProcess } from "#root/index";
+import { getAllFiles } from "#utils/file-loader";
 
 export function registerAddon(metadata: AddonOptions) {
   const loader = async () => {

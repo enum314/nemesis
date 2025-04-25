@@ -2,8 +2,8 @@ import "dotenv/config";
 
 import ms from "ms";
 
-import { Logger } from "./lib/logger.js";
-import { initializeBot } from "./sharding.js";
+import { Logger } from "#lib/logger";
+import { initializeBot } from "#root/sharding";
 
 const startingTime = Date.now();
 

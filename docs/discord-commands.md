@@ -10,7 +10,7 @@ The template uses a class-based approach for defining slash commands. Each comma
 // src/commands/ping.ts
 import { SlashCommandBuilder } from "discord.js";
 
-import { Command } from "../classes/command.js";
+import { Command } from "#classes/command.js";
 
 const command = new Command(
   new SlashCommandBuilder().setName("ping").setDescription("Replies with pong!")
@@ -58,7 +58,7 @@ You can create and register inhibitors in the `src/functions/inhibitors.ts` file
 
 ```typescript
 // src/functions/inhibitors.ts
-import type { InhibitorFunction } from "../utils/types.js";
+import type { InhibitorFunction } from "#utils/types.js";
 
 // Create a cooldown inhibitor
 const cooldownInhibitor: InhibitorFunction = (interaction, command) => {

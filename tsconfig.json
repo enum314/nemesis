@@ -36,7 +36,36 @@
         "target": "ESNext",
         "useDefineForClassFields": true,
         "outDir": "dist",
-        "baseUrl": "src"
+        "baseUrl": "src",
+        "paths": {
+            "#root/*": [
+                "./*"
+            ],
+            "#classes/*": [
+                "./classes/*"
+            ],
+            "#lib/*": [
+                "./lib/*"
+            ],
+            "#utils/*": [
+                "./utils/*"
+            ],
+            "#functions/*": [
+                "./functions/*"
+            ],
+            "#events/*": [
+                "./events/*"
+            ],
+            "#commands/*": [
+                "./commands/*"
+            ],
+            "#configs/*": [
+                "./configs/*"
+            ],
+            "#addons/*": [
+                "./addons/*"
+            ]
+        }
     },
     "include": [
         "src"

@@ -1,8 +1,8 @@
 import { EmbedBuilder, userMention } from "discord.js";
 
-import { Event } from "../../../classes/event.js";
-import { mustache } from "../../../utils/mustache.js";
-import welcomeConfig from "../configs/welcome.js";
+import welcomeConfig from "#addons/welcomer/configs/welcome";
+import { Event } from "#classes/event";
+import { mustache } from "#utils/mustache";
 
 const event = new Event("guildMemberAdd", async (_, member) => {
   // Get the configuration

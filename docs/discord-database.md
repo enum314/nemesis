@@ -21,8 +21,8 @@ You can import and use the database client in any part of your application:
 // Example usage in a command
 import { SlashCommandBuilder } from "discord.js";
 
-import { Command } from "../classes/command.js";
-import { db } from "../lib/db.js";
+import { Command } from "#classes/command";
+import { db } from "#lib/db";
 
 const command = new Command(
   new SlashCommandBuilder()
@@ -156,7 +156,7 @@ async function addUserXP(userId: string, amount: number) {
 When you modify your Prisma schema, you'll need to generate a migration:
 
 ```bash
-npx prisma migrate dev --name what_changed
+pnpx prisma migrate dev --name what_changed
 ```
 
 This will create a migration file in `prisma/migrations` and update your database schema.

@@ -1,8 +1,8 @@
 import { EmbedBuilder } from "discord.js";
 
-import { Event } from "../../../classes/event.js";
-import { mustache } from "../../../utils/mustache.js";
-import goodbyeConfig from "../configs/goodbye.js";
+import goodbyeConfig from "#addons/welcomer/configs/goodbye";
+import { Event } from "#classes/event";
+import { mustache } from "#utils/mustache";
 
 const event = new Event("guildMemberRemove", async (_, member) => {
   // Get the configuration

@@ -1,6 +1,6 @@
 import { Client, type ClientEvents } from "discord.js";
 
-import { Logger } from "../lib/logger.js";
+import { Logger } from "#lib/logger";
 
 export class Event<K extends keyof ClientEvents> {
   constructor(

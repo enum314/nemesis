@@ -13,12 +13,12 @@ import {
   type ClientEvents,
 } from "discord.js";
 
-import type { Configuration } from "../lib/configuration.js";
-import { Logger } from "../lib/logger.js";
-import type { Addon } from "./addon.js";
-import { Command } from "./command.js";
-import { Dispatcher } from "./dispatcher.js";
-import { Event } from "./event.js";
+import type { Addon } from "#classes/addon";
+import { Command } from "#classes/command";
+import { Dispatcher } from "#classes/dispatcher";
+import { Event } from "#classes/event";
+import type { Configuration } from "#lib/configuration";
+import { Logger } from "#lib/logger";
 
 export class Client<
   Ready extends boolean = boolean,

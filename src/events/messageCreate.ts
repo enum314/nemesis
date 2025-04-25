@@ -1,4 +1,4 @@
-import { Event } from "../classes/event.js";
+import { Event } from "#classes/event";
 
 const event = new Event("messageCreate", (client, message) => {
   // Ignore bot messages

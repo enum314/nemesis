@@ -13,7 +13,7 @@ The `paginate.ts` utility provides an easy-to-use pagination system for Discord 
 ```typescript
 import { EmbedBuilder } from "discord.js";
 
-import { paginate } from "../utils/paginate.js";
+import { paginate } from "#utils/paginate";
 
 command.run(async (interaction) => {
   // Create multiple embeds for pagination
@@ -35,7 +35,7 @@ The pagination system automatically adds navigation buttons and handles user int
 The `chunk.ts` utility splits arrays into smaller chunks, which is useful for processing large datasets or creating paginated content:
 
 ```typescript
-import { chunk } from "../utils/chunk.js";
+import { chunk } from "#utils/chunk";
 
 // Split an array into chunks of 10 items each
 const users = ["user1", "user2", "user3" /* ... more users */];
@@ -53,7 +53,7 @@ userChunks.forEach((userChunk, index) => {
 The `merge.ts` utility provides a deep merge function for combining objects, which is especially useful when working with configuration objects:
 
 ```typescript
-import { merge } from "../utils/merge.js";
+import { merge } from "#utils/merge";
 
 // Default settings
 const defaultSettings = {
@@ -97,7 +97,7 @@ const mergedSettings = merge(defaultSettings, userSettings);
 The `mustache.ts` utility provides a simple template rendering system using Mustache templates:
 
 ```typescript
-import { mustache } from "../utils/mustache.js";
+import { mustache } from "#utils/mustache";
 
 // Render a template with data
 const template = "Hello, {{name}}! You have {{count}} new messages.";
@@ -116,7 +116,7 @@ This is particularly useful for creating dynamic messages or formatting text wit
 The `loadFiles.ts` utility provides a function to recursively load all files from a directory, which is used internally by the bot framework to load commands and events:
 
 ```typescript
-import { getAllFiles } from "../utils/loadFiles.js";
+import { getAllFiles } from "#utils/loadFiles";
 
 // Get all files from a directory recursively
 const commandFiles = getAllFiles("commands");
@@ -136,7 +136,7 @@ The Nemesis template includes a set of file system utilities in `src/lib/fs.ts` 
 
 ```typescript
 // Example imports from fs.ts
-import { existsFile, mkdir, readFile, writeFile } from "../lib/fs.js";
+import { existsFile, mkdir, readFile, writeFile } from "#lib/fs";
 ```
 
 ### Available Functions
@@ -159,7 +159,7 @@ The Nemesis template includes a powerful logging system built on Winston that su
 ### Using the Logger Directly
 
 ```typescript
-import { Logger } from "../lib/logger.js";
+import { Logger } from "#lib/logger";
 
 // Different log levels
 Logger.info("This is an info message");

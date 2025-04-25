@@ -7,7 +7,7 @@ import {
   type SlashCommandSubcommandsOnlyBuilder,
 } from "discord.js";
 
-import { Logger } from "../lib/logger.js";
+import { Logger } from "#lib/logger";
 
 type CommandRunner = (
   interaction: ChatInputCommandInteraction<"cached">

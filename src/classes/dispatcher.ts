@@ -6,9 +6,9 @@ import {
   Routes,
 } from "discord.js";
 
-import { inhibitors } from "../functions/inhibitors.js";
-import { existsFile, readFile, writeFile } from "../lib/fs.js";
-import type { Command } from "./command.js";
+import type { Command } from "#classes/command";
+import { inhibitors } from "#functions/inhibitors";
+import { existsFile, readFile, writeFile } from "#lib/fs";
 
 export class Dispatcher {
   public readonly awaiting: Set<string>;

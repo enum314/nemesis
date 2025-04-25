@@ -2,15 +2,15 @@ import { deepStrictEqual } from "assert";
 import yaml from "yaml";
 import type { z } from "zod";
 
-import { merge } from "../utils/merge.js";
 import {
   existsDirectory,
   existsFile,
   mkdir,
   readFile,
   writeFile,
-} from "./fs.js";
-import { Logger } from "./logger.js";
+} from "#lib/fs";
+import { Logger } from "#lib/logger";
+import { merge } from "#utils/merge";
 
 export class Configuration<ConfigurationStructure> {
   private cache!: ConfigurationStructure;
@@ -161,7 +161,7 @@ export class Configuration<ConfigurationStructure> {
  *
  * ```typescript
  * import { z } from "zod";
- * import { Configuration } from "./configuration.js";
+ * import { Configuration } from "./configuration";
  *
  * // Define your configuration schema using Zod
  * const appConfigSchema = z.object({

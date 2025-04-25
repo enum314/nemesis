@@ -51,6 +51,17 @@
         "tsc-watch": "^6.2.1",
         "typescript": "^5.8.3"
     },
+    "imports": {
+        "#root/*": "./dist/*.js",
+        "#classes/*": "./dist/classes/*.js",
+        "#lib/*": "./dist/lib/*.js",
+        "#utils/*": "./dist/utils/*.js",
+        "#functions/*": "./dist/functions/*.js",
+        "#events/*": "./dist/events/*.js",
+        "#commands/*": "./dist/commands/*.js",
+        "#configs/*": "./dist/configs/*.js",
+        "#addons/*": "./dist/addons/*.js"
+    },
     "commitlint": {
         "extends": [
             "@commitlint/config-conventional"

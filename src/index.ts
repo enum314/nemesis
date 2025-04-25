@@ -3,13 +3,13 @@ import "dotenv/config";
 import { GatewayIntentBits, type ClientEvents } from "discord.js";
 import ms from "ms";
 
-import { Addon } from "./classes/addon.js";
-import { Client } from "./classes/client.js";
-import { Command } from "./classes/command.js";
-import { Event } from "./classes/event.js";
-import { Configuration } from "./lib/configuration.js";
-import { setCurrentShardId, setDiscordClient } from "./lib/logger.js";
-import { getAllFiles } from "./utils/file-loader.js";
+import { Addon } from "#classes/addon";
+import { Client } from "#classes/client";
+import { Command } from "#classes/command";
+import { Event } from "#classes/event";
+import { Configuration } from "#lib/configuration";
+import { setCurrentShardId, setDiscordClient } from "#lib/logger";
+import { getAllFiles } from "#utils/file-loader";
 
 const startingTime = Date.now();
 
@@ -75,31 +75,38 @@ async function loadAddons() {
   }
 
   for (const file of addonFiles) {
-    const filePath = `./${file}`;
-    const module = await import(filePath);
+    try {
+      const filePath = `./${file}`;
+      const module = await import(filePath);
 
-    if (module.default instanceof Addon) {
-      const addon = module.default as Addon;
-      const addonName = addon.options.id;
+      if (module.default instanceof Addon) {
+        const addon = module.default as Addon;
+        const addonName = addon.options.id;
 
+        if (!isShardProcess) {
+          client.logger.info(`- ${addonName}`);
+        }
+
+        client.addons.set(addonName, addon);
+
+        const { commands, events, configurations } = await addon.loader();
+
+        for (const command of commands) {
+          addCommand(command, false);
+        }
+
+        for (const event of events) {
+          addEvent(event, false);
+        }
+
+        for (const configuration of configurations) {
+          await addConfiguration(configuration, false);
+        }
+      }
+    } catch (error) {
       if (!isShardProcess) {
-        client.logger.info(`- ${addonName}`);
-      }
-
-      client.addons.set(addonName, addon);
-
-      const { commands, events, configurations } = await addon.loader();
-
-      for (const command of commands) {
-        addCommand(command, false);
-      }
-
-      for (const event of events) {
-        addEvent(event, false);
-      }
-
-      for (const configuration of configurations) {
-        await addConfiguration(configuration, false);
+        client.logger.error(`[Addons] Failed to load addon file ${file}`);
+        client.logger.error(error);
       }
     }
   }
@@ -121,7 +128,6 @@ async function loadCommands() {
 
   for (const file of commandFiles) {
     try {
-      // For ESM imports we need to keep the extension
       const filePath = `./${file}`;
       const module = await import(filePath);
 
@@ -154,7 +160,6 @@ async function loadEvents() {
 
   for (const file of eventFiles) {
     try {
-      // For ESM imports we need to keep the extension
       const filePath = `./${file}`;
       const module = await import(filePath);
 
@@ -202,12 +207,20 @@ async function loadConfigurations() {
   }
 
   for (const file of configurationFiles) {
-    const filePath = `./${file}`;
+    try {
+      const filePath = `./${file}`;
+      const module = await import(filePath);
 
-    const module = await import(filePath);
-
-    if (module.default instanceof Configuration) {
-      await addConfiguration(module.default);
+      if (module.default instanceof Configuration) {
+        await addConfiguration(module.default);
+      }
+    } catch (error) {
+      if (!isShardProcess) {
+        client.logger.error(
+          `[Configurations] Failed to load configuration file ${file}`
+        );
+        client.logger.error(error);
+      }
     }
   }
 

@@ -1,3 +1,3 @@
-import type { InhibitorFunction } from "../utils/types.js";
+import type { InhibitorFunction } from "#utils/types";
 
 export const inhibitors: InhibitorFunction[] = [];

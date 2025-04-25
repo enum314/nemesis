@@ -13,6 +13,7 @@ The template offers:
 - **Development best practices** baked in from the start
 - **Production-ready configuration** for immediate deployment with Docker
 - **Pterodactyl integration** for easy hosting on game server panels
+- **Clean imports** using Node.js subpath imports to avoid relative path hell
 
 ## 📋 Prerequisites
 

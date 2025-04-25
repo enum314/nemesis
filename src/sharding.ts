@@ -4,7 +4,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { ShardingManager } from "discord.js";
 
-import { Logger, setAsShardManager } from "./lib/logger.js";
+import { Logger, setAsShardManager } from "#lib/logger";
 
 // Get the directory name of the current module
 const __filename = fileURLToPath(import.meta.url);

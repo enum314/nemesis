@@ -8,7 +8,7 @@ Discord.js events are handled through the Event class and organized in the `src/
 
 ```typescript
 // src/events/messageCreate.ts
-import { Event } from "../classes/event.js";
+import { Event } from "#classes/event.js";
 
 const event = new Event("messageCreate", (client, message) => {
   // Event handler implementation
@@ -30,7 +30,7 @@ The Event class takes two parameters:
 
 ```typescript
 // src/events/guildCreate.ts
-import { Event } from "../classes/event.js";
+import { Event } from "#classes/event.js";
 
 const event = new Event("guildCreate", (client, guild) => {
   client.logger.info(`Bot joined a new guild: ${guild.name} (${guild.id})`);
@@ -46,7 +46,7 @@ export default event;
 
 ```typescript
 // src/events/ready.ts
-import { Event } from "../classes/event.js";
+import { Event } from "#classes/event.js";
 
 const event = new Event("ready", (client) => {
   client.logger.info(`Logged in as ${client.user?.tag}`);
@@ -64,7 +64,7 @@ export default event;
 
 ```typescript
 // src/events/messageCreate.ts
-import { Event } from "../classes/event.js";
+import { Event } from "#classes/event.js";
 
 const event = new Event("messageCreate", (client, message) => {
   // Ignore messages from bots

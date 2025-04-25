@@ -22,7 +22,7 @@ First, create the addon.ts file:
 
 ```typescript
 // src/addons/welcomer/addon.ts
-import { registerAddon } from "../../functions/loader.js";
+import { registerAddon } from "#functions/loader.js";
 
 export default registerAddon({
   id: "welcomer",
@@ -43,7 +43,7 @@ Add configuration files in the `configs` directory:
 // src/addons/welcomer/configs/welcome.ts
 import { z } from "zod";
 
-import { Configuration } from "../../../lib/configuration.js";
+import { Configuration } from "#lib/configuration.js";
 
 // Define schema for welcome configuration
 const welcomeConfigSchema = z
@@ -82,9 +82,9 @@ Add event handlers in the `events` directory:
 // src/addons/welcomer/events/guildMemberAdd.ts
 import { EmbedBuilder, userMention } from "discord.js";
 
-import { Event } from "../../../classes/event.js";
-import { mustache } from "../../../utils/mustache.js";
-import welcomeConfig from "../configs/welcome.js";
+import welcomeConfig from "#addons/welcomer/configs/welcome.js";
+import { Event } from "#classes/event.js";
+import { mustache } from "#utils/mustache.js";
 
 const event = new Event("guildMemberAdd", async (_, member) => {
   // Get the configuration

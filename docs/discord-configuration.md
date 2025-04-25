@@ -23,7 +23,7 @@ Here's how to create and use a configuration file in your Discord bot:
 // src/configs/bot-settings.ts
 import { z } from "zod";
 
-import { Configuration } from "../lib/configuration.js";
+import { Configuration } from "#lib/configuration.js";
 
 // Define your configuration schema using Zod
 const botConfigSchema = z.object({
@@ -74,7 +74,7 @@ For configurations that are specific to an addon, you can specify the addon name
 // src/addons/music-player/configs/music.ts
 import { z } from "zod";
 
-import { Configuration } from "../../../lib/configuration.js";
+import { Configuration } from "#lib/configuration.js";
 
 const musicConfigSchema = z.object({
   maxQueueSize: z.number().int().positive(),
@@ -105,8 +105,8 @@ Once you've created a configuration file, you can use it throughout your bot:
 // src/commands/moderation/ban.ts
 import { SlashCommandBuilder } from "discord.js";
 
-import { Command } from "../../classes/command.js";
-import { botConfig } from "../../configs/bot-settings.js";
+import { Command } from "#classes/command.js";
+import { botConfig } from "#configs/bot-settings.js";
 
 const command = new Command(
   new SlashCommandBuilder()
@@ -140,7 +140,7 @@ export default command;
 You can update configuration values at runtime:
 
 ```typescript
-import { botConfig } from "../../configs/bot-settings.js";
+import { botConfig } from "#configs/bot-settings.js";
 
 async function updateLogChannel(channelId: string) {
   const result = await botConfig.update({

@@ -4,7 +4,7 @@ import {
   type ClientEvents,
 } from "discord.js";
 
-import { Command } from "../classes/command.js";
+import { Command } from "#classes/command";
 
 export type InhibitorFunction = (
   interaction: ChatInputCommandInteraction<"cached">,
