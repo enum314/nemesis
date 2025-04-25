@@ -6,7 +6,7 @@ import {
   Routes,
 } from "discord.js";
 
-import { inhibitors } from "../inhibitors/index.js";
+import { inhibitors } from "../functions/inhibitors.js";
 import { existsFile, readFile, writeFile } from "../lib/fs.js";
 import type { Command } from "./command.js";
 
@@ -81,7 +81,6 @@ export class Dispatcher {
             throw new Error();
           }
         }
-         
       } catch (_err) {
         modified = true;
       }

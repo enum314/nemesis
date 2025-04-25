@@ -6,6 +6,8 @@ import {
   ChatInputCommandInteraction,
   EmbedBuilder,
   InteractionCollector,
+  type APIActionRowComponent,
+  type APIMessageActionRowComponent,
 } from "discord.js";
 
 import { mustache } from "./mustache";
@@ -54,7 +56,7 @@ export async function paginate(
       ...(opts?.rows[
         index < opts.rows.length ? index : opts.rows.length - 1 // prevent out of bounds
       ] || []),
-    ],
+    ] as unknown as APIActionRowComponent<APIMessageActionRowComponent>[],
   });
 
   if (embeds.length === 1) return null;
@@ -112,7 +114,7 @@ export async function paginate(
           ...(opts?.rows[
             index < opts.rows.length ? index : opts.rows.length - 1 // prevent out of bounds
           ] || []),
-        ],
+        ] as unknown as APIActionRowComponent<APIMessageActionRowComponent>[],
       });
     });
 

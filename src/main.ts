@@ -18,10 +18,6 @@ const TOTAL_SHARDS = process.env.TOTAL_SHARDS
 // Start the bot with or without sharding
 (async () => {
   try {
-    Logger.info(
-      `Starting bot with sharding ${ENABLE_SHARDING ? "enabled" : "disabled"}`
-    );
-
     await initializeBot(ENABLE_SHARDING, {
       totalShards: TOTAL_SHARDS,
       // Additional options can be configured here

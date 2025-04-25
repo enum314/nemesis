@@ -3,7 +3,13 @@ import yaml from "yaml";
 import type { z } from "zod";
 
 import { merge } from "../utils/merge.js";
-import { existsFile, readFile, writeFile } from "./fs.js";
+import {
+  existsDirectory,
+  existsFile,
+  mkdir,
+  readFile,
+  writeFile,
+} from "./fs.js";
 import { Logger } from "./logger.js";
 
 export class Configuration<ConfigurationStructure> {
@@ -21,6 +27,7 @@ export class Configuration<ConfigurationStructure> {
         ConfigurationStructure
       >;
       defaults: ConfigurationStructure;
+      addon?: string;
     }
   ) {}
 
@@ -60,11 +67,16 @@ export class Configuration<ConfigurationStructure> {
       }
     ) as ConfigurationStructure;
 
+    const fileExtension = this.data.type === "json" ? "json" : "yml";
+    const fileName = `${this.data.name}.${fileExtension}`;
+
+    const configPath = [
+      "configs",
+      ...(this.data.addon ? [this.data.addon, fileName] : [fileName]),
+    ];
+
     await writeFile(
-      [
-        "configs",
-        `${this.data.name}.${this.data.type === "json" ? "json" : "yml"}`,
-      ],
+      configPath,
       this.data.type === "json"
         ? JSON.stringify(data, null, 2)
         : yaml.stringify(data)
@@ -77,7 +89,19 @@ export class Configuration<ConfigurationStructure> {
 
   private async _load() {
     const fileExtension = this.data.type === "json" ? "json" : "yml";
-    const configPath = ["configs", `${this.data.name}.${fileExtension}`];
+    const fileName = `${this.data.name}.${fileExtension}`;
+
+    const configPath = [
+      "configs",
+      ...(this.data.addon ? [this.data.addon, fileName] : [fileName]),
+    ];
+
+    if (
+      this.data.addon &&
+      !(await existsDirectory(["configs", this.data.addon]))
+    ) {
+      await mkdir(["configs", this.data.addon]);
+    }
 
     if (await existsFile(configPath)) {
       try {
