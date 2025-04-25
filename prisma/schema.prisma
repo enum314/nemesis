@@ -9,10 +9,9 @@ generator client {
 }
 
 datasource db {
-    provider          = "mysql"
-    url               = env("DATABASE_URL")
-    relationMode      = "foreignKeys"
-    shadowDatabaseUrl = env("SHADOW_DATABASE_URL") // Optional: Used for migrations
+    provider     = "mysql"
+    url          = env("DATABASE_URL")
+    relationMode = "foreignKeys"
 }
 
 model User {
