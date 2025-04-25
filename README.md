@@ -100,7 +100,7 @@ Options:
 
 ### 2. Pterodactyl Panel Deployment
 
-The template includes Pterodactyl egg files for deployment on Pterodactyl game server panels:
+The template includes Pterodactyl egg files for deployment on Pterodactyl game server panels. This is the **recommended and primary deployment method** for this bot template:
 
 - `egg-nemesis.json` - JSON format egg for Pterodactyl
 - `egg-nemesis.yml` - YAML format egg for Pterodactyl
@@ -121,35 +121,49 @@ The template includes Pterodactyl egg files for deployment on Pterodactyl game s
 
 3. **Configurable Options**:
 
-   - **Auto Update**: Automatically pull changes on startup
-   - **Node Environment**: Choose between production, development, staging, or test
-   - **Additional Packages**: Install extra Node.js packages if needed
-   - **Wipe Directory**: Option to clean installation directory
-   - **Startup Command**: Customize how the application starts
+   - **Startup Command**: Customize how the application starts (default: `prisma migrate deploy && node .`)
    - **GitHub Repository Settings**:
      - **GitHub Username**: Username of the repository owner
      - **GitHub Repository**: Name of the repository to clone
-     - **GitHub Branch**: Branch to use (default: main)
+     - **GitHub Tag**: Release tag to deploy (use 'latest' for most recent)
      - **GitHub Personal Access Token**: For private repositories (optional)
 
 4. **After Installation**:
    - The server will automatically install your project from the specified GitHub repository
    - It will configure the correct port in .env
-   - The server will build and start automatically
+   - On each startup, the update script will:
+     - Clean the dist/ directory
+     - Download the latest release from GitHub
+     - Verify the integrity of the downloaded files
+     - Extract the release
+     - Install production dependencies
+   - The server will then run your specified startup command
 
-The deployment script handles:
+### Update Script
 
-- Environment setup
-- Pulling latest changes from GitHub
-- Building and starting Docker containers
-- Intelligent rebuilding (only when needed)
-- Status checking and error reporting
+The bot includes an automatic update script (`scripts/update.sh`) that runs before the main application starts on Pterodactyl. This script:
+
+- Retrieves the latest release from your GitHub repository
+- Cleans up the dist/ directory to ensure a fresh deployment
+- Verifies file integrity with checksums
+- Installs production dependencies with `pnpm install --production`
+
+The update script uses environment variables set in the Pterodactyl egg:
+
+- `GITHUB_USERNAME` - GitHub username for the repository
+- `GITHUB_REPOSITORY` - Name of the repository
+- `GITHUB_TAG` - Release tag to fetch (default: latest)
+- `GITHUB_TOKEN` - Optional token for private repositories
+
+This ensures your bot is always running the latest release with all dependencies properly installed.
 
 ## 🏗️ Template Structure
 
 ```
 nemesis/
 ├── .github/workflows/     # GitHub Actions CI/CD configurations
+├── scripts/               # Utility scripts
+│   └── update.sh          # Auto-update script for Pterodactyl
 ├── src/                   # Application source code
 ├── .dockerignore          # Files to exclude from Docker build
 ├── .env.example           # Example environment variables
@@ -170,33 +184,12 @@ This project includes a multi-stage Dockerfile and Docker Compose configuration:
 ### Development
 
 ```bash
-docker-compose up app-dev
+docker compose up
 ```
 
 - Hot reload enabled
 - Source code mounted as a volume
-- Running on port 3001
 - Development dependencies included
-
-### Production
-
-```bash
-docker-compose up app-prod
-```
-
-- Optimized build with minimal dependencies
-- Running on port 3001
-- Production-ready configuration
-
-### Building Images Manually
-
-```bash
-# Build development image
-docker build --target development -t nemesis-dev .
-
-# Build production image
-docker build --target production -t nemesis-prod .
-```
 
 ## 📝 Available Scripts
 
@@ -242,27 +235,20 @@ ENABLE_SHARDING=true TOTAL_SHARDS=2 node .
 
 This approach gives you more flexibility since it doesn't rely on predefined scripts. Instead, you can control sharding directly through environment variables when starting the bot. This keeps things simpler and gives you more control over the configuration.
 
-Let me know if you'd prefer a different approach to enabling/disabling sharding in your bot!
-
 ## 🚢 CI/CD
 
 The template includes GitHub workflows for:
 
-- **PR Staging**: Runs tests, lint checks, and builds on pull requests
-- **Staging**: Runs tests and lint checks when merging to main
+- **PR Staging**: Runs on pull requests to the main branch. Performs lint checks and runs tests to ensure code quality before merging.
+- **Staging**: Runs on pushes to the main branch. Performs lint checks and tests similar to PR Staging.
+- **Release**: Triggered when a version tag (v*.*.\*) is pushed. Builds the project, creates a bot archive (bot.tar.gz), generates checksums, and publishes a GitHub release. Also maintains a 'latest' tag for easy reference.
 
-## 🛡️ Environment Variables
+Each workflow can be customized with commit messages:
 
-Copy `.env.example` to `.env` and adjust the variables as needed:
+- Use `[skip lint]` to skip linting checks
+- Use `[skip test]` to skip tests
 
-```bash
-cp .env.example .env
-```
-
-Required environment variables:
-
-- `PORT`: Application port (default: 3001)
-- Other variables as specified in `.env.example`
+Note: Workflows automatically skip certain paths like documentation, configuration files, and development tools.
 
 ## 🧪 Testing
 

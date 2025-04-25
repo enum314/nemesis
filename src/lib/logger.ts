@@ -66,7 +66,7 @@ const consoleTransport = new winston.transports.Console({
 
 // Create and export the logger with console transport only
 export const Logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || "info",
+  level: "info",
   format: winston.format.combine(...formats),
   transports: [consoleTransport],
 });

@@ -18,19 +18,6 @@ services:
     depends_on:
       - mysql
 
-  # Production service
-  app-prod:
-    build:
-      context: .
-      target: production
-    container_name: nemesis-prod
-    ports:
-      - "3001:3001"
-    environment:
-      - NODE_ENV=production
-      - PORT=3001
-    restart: unless-stopped
-
   # MySQL service for development
   mysql:
     image: mysql:8.4

@@ -88,19 +88,3 @@ jobs:
       - run: pnpm install
 
       - run: pnpm test
-
-  # deploy:
-  #   needs: [lint, test]
-  #   runs-on: ubuntu-latest
-  #   environment: Staging
-  #   if: "(!contains(needs.pre_ci.outputs.commit_message, '[skip deploy]'))"
-  #   steps:
-  #     - name: Deploy to staging server
-  #       uses: appleboy/ssh-action@v1
-  #       with:
-  #         host: ${{ secrets.STAGING_HOST }}
-  #         username: ${{ secrets.STAGING_USER }}
-  #         key: ${{ secrets.STAGING_SSH_KEY }}
-  #         script: |
-  #           cd ${{ secrets.STAGING_DEPLOY_PATH }}
-  #           ./deploy.sh --update
