@@ -145,24 +145,6 @@ nemesis/
 └── tsconfig.json          # TypeScript configuration
 ```
 
-## 🐳 Docker
-
-This project uses Docker as the primary development and deployment method, with a multi-stage Dockerfile and Docker Compose configuration:
-
-```bash
-# Start development environment
-docker compose up
-
-# Start production environment
-docker compose up app-prod
-```
-
-The development environment provides:
-
-- Hot reload enabled
-- Source code mounted as a volume
-- Development dependencies included
-
 ## 📝 Available Scripts
 
 - `pnpm build` - Build for production
