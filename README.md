@@ -194,4 +194,4 @@ This template is licensed under the MIT License - see the LICENSE file for detai
 
 ## 🤖 Discord Bot Features
 
-If you're looking to use this template for a Discord bot, please see [DISCORD.md](DISCORD.md) for specific Discord.js integration features and configuration.
+If you're looking to use this template for a Discord bot, please see [DISCORD.md](docs/discord-index.md) for specific Discord.js integration features and configuration.

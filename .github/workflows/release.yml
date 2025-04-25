@@ -56,7 +56,7 @@ jobs:
           mkdir -p release
 
           # Create the bot.tar.gz archive excluding src and node_modules
-          tar --exclude='./src' --exclude='./node_modules' --exclude='./.git' --exclude='./release' -czf release/bot.tar.gz .
+          tar --exclude='./src' --exclude='./node_modules' --exclude='./.git' --exclude='./release' --exclude='./docs' -czf release/bot.tar.gz .
 
           # Create checksum file
           cd release
