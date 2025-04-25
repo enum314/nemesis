@@ -4,7 +4,7 @@ This document explains how to use the configuration system for Discord bots in t
 
 ## ⚙️ Overview
 
-The Nemesis template includes a powerful configuration system that uses Zod for schema validation and supports both JSON and YAML formats. All configuration files are stored in the `src/configs` directory.
+The Nemesis template includes a powerful configuration system that uses Zod for schema validation and supports both JSON and YAML formats. All configuration files are stored in the `configs` directory.
 
 ### Features
 
@@ -13,6 +13,7 @@ The Nemesis template includes a powerful configuration system that uses Zod for 
 - **Auto-Creation**: Configuration files are automatically created if they don't exist
 - **Format Options**: Support for both JSON and YAML configuration formats
 - **Partial Updates**: Ability to update only specific parts of a configuration
+- **Addon Support**: Ability to organize configurations by addon
 
 ## Creating a Configuration
 
@@ -65,6 +66,37 @@ export const botConfig = new Configuration<BotConfig>({
 });
 ```
 
+## Addon-Specific Configurations
+
+For configurations that are specific to an addon, you can specify the addon name to organize them in a subdirectory:
+
+```typescript
+// src/addons/music-player/configs/music.ts
+import { z } from "zod";
+
+import { Configuration } from "../../../lib/configuration.js";
+
+const musicConfigSchema = z.object({
+  maxQueueSize: z.number().int().positive(),
+  defaultVolume: z.number().min(0).max(100),
+  allowedChannels: z.array(z.string()).default([]),
+});
+
+type MusicConfig = z.infer<typeof musicConfigSchema>;
+
+export const musicConfig = new Configuration<MusicConfig>({
+  name: "music",
+  type: "json",
+  schema: musicConfigSchema,
+  defaults: {
+    maxQueueSize: 100,
+    defaultVolume: 50,
+    allowedChannels: [],
+  },
+  addon: "music-player", // This will store the config in configs/music-player/music.json
+});
+```
+
 ## Using Configuration in Your Bot
 
 Once you've created a configuration file, you can use it throughout your bot:
@@ -84,8 +116,13 @@ const command = new Command(
 );
 
 command.run(async (interaction) => {
-  // Get the configuration
+  // Get the configuration directly
   const config = await botConfig.get();
+
+  // Or access it through the client's configurations collection
+  const configFromClient = await interaction.client.configurations
+    .get("bot-settings")
+    .get();
 
   // Use values from config
   const embedColor = config.embedColor;
@@ -121,22 +158,25 @@ async function updateLogChannel(channelId: string) {
 }
 ```
 
-## Loading Configurations at Startup
+## Configurations Collection
 
-To ensure configurations are loaded at bot startup, you can add this to your initialization code:
+All configurations are automatically loaded and stored in the client's `configurations` collection:
 
 ```typescript
-// src/index.ts or another initialization file
-import { botConfig } from "./configs/bot-settings.js";
+// Access a configuration by name
+const botSettings = client.configurations.get("bot-settings");
+const musicConfig = client.configurations.get("music");
 
-async function initializeBot() {
-  // Load all configurations
-  await botConfig.load();
+// Get all loaded configurations
+const allConfigs = Array.from(client.configurations.values());
 
-  // Continue with bot initialization
-  // ...
-}
+// Check if a configuration exists
+const hasConfig = client.configurations.has("bot-settings");
 ```
+
+## Loading Configurations at Startup
+
+Configurations are automatically loaded at bot startup through the initialization process in `index.ts`. You do not need to manually load each configuration.
 
 ## Best Practices
 
@@ -144,3 +184,4 @@ async function initializeBot() {
 2. **Use Environment Variables** for sensitive or environment-specific values
 3. **Create Multiple Configs** for different aspects of your bot (e.g., commands, logging, etc.)
 4. **Add Config Files to .gitignore** if they contain server-specific settings
+5. **Use Addon Namespaces** to organize configurations for different addons

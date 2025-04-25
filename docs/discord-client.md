@@ -13,7 +13,9 @@ import {
   type ClientEvents,
 } from "discord.js";
 
+import type { Configuration } from "../lib/configuration.js";
 import { Logger } from "../lib/logger.js";
+import type { Addon } from "./addon.js";
 import { Command } from "./command.js";
 import { Dispatcher } from "./dispatcher.js";
 import { Event } from "./event.js";
@@ -23,9 +25,14 @@ export class Client<
 > extends DiscordClient<Ready> {
   public readonly logger: typeof Logger = Logger;
 
+  public readonly addons: Collection<string, Addon> = new Collection();
+
   public readonly commands: Collection<string, Command> = new Collection();
 
   public readonly events: Collection<string, Event<keyof ClientEvents>> =
+    new Collection();
+
+  public readonly configurations: Collection<string, Configuration<any>> =
     new Collection();
 
   public readonly dispatcher: Dispatcher = new Dispatcher(
@@ -39,9 +46,11 @@ export class Client<
 The extended Client class provides several important features:
 
 1. **Integrated Logger**: Direct access to the logging system via `client.logger`
-2. **Command Storage**: A collection for storing and accessing slash commands
-3. **Event Storage**: A collection for storing and accessing event handlers
-4. **Command Dispatcher**: An instance of the Dispatcher class for handling command registrations and interactions
+2. **Addon Storage**: A collection for storing and accessing registered addons
+3. **Command Storage**: A collection for storing and accessing slash commands
+4. **Event Storage**: A collection for storing and accessing event handlers
+5. **Configuration Storage**: A collection for storing and accessing configuration instances
+6. **Command Dispatcher**: An instance of the Dispatcher class for handling command registrations and interactions
 
 ## Type Extensions
 
@@ -51,8 +60,10 @@ The Client class also extends Discord.js typings to ensure TypeScript recognizes
 declare module "discord.js" {
   export interface Client {
     readonly logger: typeof Logger;
+    readonly addons: Collection<string, Addon>;
     readonly commands: Collection<string, Command>;
     readonly events: Collection<string, Event<keyof ClientEvents>>;
+    readonly configurations: Collection<string, Configuration<any>>;
     readonly dispatcher: Dispatcher;
   }
 }
@@ -71,6 +82,11 @@ command.run(async (interaction) => {
   // Access other commands
   const otherCommand = interaction.client.commands.get("other-command");
 
+  // Access configurations
+  const config = await interaction.client.configurations
+    .get("config-name")
+    .get();
+
   // Access the dispatcher
   await interaction.client.dispatcher.initialize();
 });
@@ -82,6 +98,9 @@ const event = new Event("ready", (client) => {
 
   // Access registered commands
   client.logger.info(`Loaded ${client.commands.size} commands`);
+
+  // Access registered addons
+  client.logger.info(`Loaded ${client.addons.size} addons`);
 });
 ```
 

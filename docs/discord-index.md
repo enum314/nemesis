@@ -9,9 +9,10 @@ Welcome to the Discord bot documentation for the Nemesis template. This index pr
 3. [Discord Commands](./discord-commands.md) - Creating and handling slash commands
 4. [Discord Events](./discord-events.md) - Handling Discord events
 5. [Discord Sharding](./discord-sharding.md) - Implementing sharding for scalability
-6. [Configuration System](./discord-configuration.md) - Bot configuration with Zod validation
-7. [Database Integration](./discord-database.md) - Using Prisma with your Discord bot
-8. [Utility Functions](./discord-utilities.md) - Helper utilities for bot development
+6. [Discord Addons](./discord-addons.md) - Creating modular extensions for your bot
+7. [Configuration System](./discord-configuration.md) - Bot configuration with Zod validation
+8. [Database Integration](./discord-database.md) - Using Prisma with your Discord bot
+9. [Utility Functions](./discord-utilities.md) - Helper utilities for bot development
 
 ## Getting Started
 
