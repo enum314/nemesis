@@ -5,7 +5,7 @@
     "type": "module",
     "scripts": {
         "prepare": "husky install",
-        "start": "node .",
+        "start": "prisma migrate deploy && node .",
         "predev": "pnpm clean && prisma generate",
         "dev": "tsc-watch --onSuccess \"node .\"",
         "test": "pnpm build",

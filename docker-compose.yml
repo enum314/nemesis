@@ -1,6 +1,6 @@
 services:
   # Development service
-  app-dev:
+  nemesis:
     build:
       context: .
       target: development

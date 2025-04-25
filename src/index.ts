@@ -6,6 +6,7 @@ import ms from "ms";
 import { Client } from "./classes/client.js";
 import { Command } from "./classes/command.js";
 import { Event } from "./classes/event.js";
+import { Configuration } from "./lib/configuration.js";
 import { setCurrentShardId, setDiscordClient } from "./lib/logger.js";
 import { getAllFiles } from "./utils/loadFiles.js";
 
@@ -123,6 +124,23 @@ async function loadEvents() {
   }
 }
 
+/**
+ * Preload all configuration files for faster access
+ */
+async function loadConfigurations() {
+  const configurationFiles = getAllFiles("configs");
+
+  for (const file of configurationFiles) {
+    const filePath = `./${file}`;
+
+    const module = await import(filePath);
+
+    if (module.default instanceof Configuration) {
+      await module.default.load();
+    }
+  }
+}
+
 if (!isShardProcess) {
   client.logger.info(`[Discord] Connecting...`);
 }
@@ -134,6 +152,7 @@ client.once("ready", async () => {
   // Load commands and events
   await loadCommands();
   await loadEvents();
+  await loadConfigurations();
 
   await client.dispatcher.initialize();
 

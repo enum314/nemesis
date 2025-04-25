@@ -1,6 +1,6 @@
 # Nemesis
 
-A modern Discord bot template designed to jumpstart your bot development with best practices and ready-to-use infrastructure. While primarily focused on Discord bots, Nemesis can also serve as a foundation for any Node.js application.
+A modern Discord bot template that can also be used as a foundation for any Node.js application. This template is designed to jumpstart your development with best practices and ready-to-use infrastructure.
 
 ## 🚀 About This Template
 
@@ -8,28 +8,36 @@ This is a template repository that provides a solid foundation for building mode
 
 The template offers:
 
-- **Discord.js integration** with advanced sharding and bot framework
 - **Ready-to-use infrastructure** with Docker, CI/CD workflows, and deployment scripts
 - **Modern tech stack** with Node.js 22 and PNPM 10
 - **Development best practices** baked in from the start
-- **Production-ready configuration** for immediate deployment
+- **Production-ready configuration** for immediate deployment with Docker
 - **Pterodactyl integration** for easy hosting on game server panels
 
 ## 📋 Prerequisites
 
 - [Node.js](https://nodejs.org/) v22 or later
 - [PNPM](https://pnpm.io/) v10 or later
-- [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) (optional, for containerized development)
+- [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/)
 - [Git](https://git-scm.com/)
 
 ## 🛠️ Getting Started
 
 ### Using This Template
 
+1. **Create a new repository from this template**:
+
+   - Click the green "Use this template" button at the top of the GitHub repository page
+   - Select "Create a new repository"
+   - Name your new project and configure repository settings
+   - Click "Create repository from template"
+
+2. **Clone your new repository**:
+
 ```bash
-# Clone the template (or use GitHub's "Use this template" button)
-git clone https://github.com/enum314/nemesis.git my-new-project
-cd my-new-project
+# Clone your newly created repository (replace with your username/repo)
+git clone https://github.com/your-username/your-new-repo.git
+cd your-new-repo
 
 # Customize for your project
 # - Update package.json with your project details
@@ -41,69 +49,30 @@ cd my-new-project
 pnpm install
 
 # Start development server
-pnpm dev
+docker compose up
 ```
 
 ### Local Development
 
 ```bash
-# Start development environment
-pnpm dev
-
-# OR with Docker
-docker-compose up app-dev
+# Start development environment with Docker
+docker compose up
 ```
 
-### Production Environment
+This development environment includes:
 
-```bash
-# Start production environment with Docker
-docker-compose up app-prod
-```
+- Hot reload enabled
+- Source code mounted as a volume
+- Running on port 3001 (In case you want to expose an express.js server)
+- Development dependencies included
 
 ## 🚢 Deployment Options
 
-### 1. Server Deployment with Script
+### Pterodactyl Panel Deployment
 
-This template includes a deployment script that pulls directly from GitHub:
-
-```bash
-# First-time deployment
-./deploy.sh --first-run --path /opt/nemesis
-
-# Update existing deployment
-./deploy.sh --update --path /opt/nemesis
-
-# Specify a different GitHub repository
-./deploy.sh --first-run --github-user username --repository repo-name --path /opt/nemesis
-
-# For private repositories, include a personal access token
-./deploy.sh --first-run --github-user username --repository repo-name --token YOUR_TOKEN --path /opt/nemesis
-```
-
-The deployment script supports various options:
-
-```bash
-Usage: deploy.sh [OPTIONS]
-Options:
-  --github-user USER GitHub username (default: enum314)
-  --repository REPO  Repository name (default: nemesis)
-  --token TOKEN     GitHub personal access token for private repos
-  --branch NAME     Branch to deploy (default: main)
-  --path PATH       Installation path (default: /opt/nemesis)
-  --first-run       Perform first-time setup
-  --force-rebuild   Force rebuild of Docker containers
-  --show-logs       Show Docker logs after deployment
-  --update          Update existing deployment
-  --help            Show this help message
-```
-
-### 2. Pterodactyl Panel Deployment
-
-The template includes Pterodactyl egg files for deployment on Pterodactyl game server panels. This is the **recommended and primary deployment method** for this bot template:
+The template includes Pterodactyl egg files for deployment on Pterodactyl game server panels. This is the **recommended deployment method** for this template:
 
 - `egg-nemesis.json` - JSON format egg for Pterodactyl
-- `egg-nemesis.yml` - YAML format egg for Pterodactyl
 
 #### How to Use the Pterodactyl Egg:
 
@@ -141,7 +110,7 @@ The template includes Pterodactyl egg files for deployment on Pterodactyl game s
 
 ### Update Script
 
-The bot includes an automatic update script (`scripts/update.sh`) that runs before the main application starts on Pterodactyl. This script:
+The template includes an automatic update script (`scripts/update.sh`) that runs before the main application starts on Pterodactyl. This script:
 
 - Retrieves the latest release from your GitHub repository
 - Cleans up the dist/ directory to ensure a fresh deployment
@@ -155,7 +124,7 @@ The update script uses environment variables set in the Pterodactyl egg:
 - `GITHUB_TAG` - Release tag to fetch (default: latest)
 - `GITHUB_TOKEN` - Optional token for private repositories
 
-This ensures your bot is always running the latest release with all dependencies properly installed.
+This ensures your application is always running the latest release with all dependencies properly installed.
 
 ## 🏗️ Template Structure
 
@@ -163,15 +132,14 @@ This ensures your bot is always running the latest release with all dependencies
 nemesis/
 ├── .github/workflows/     # GitHub Actions CI/CD configurations
 ├── scripts/               # Utility scripts
+│   └── install.sh         # Install script for Pterodactyl (Used in egg-nemesis.json)
 │   └── update.sh          # Auto-update script for Pterodactyl
 ├── src/                   # Application source code
 ├── .dockerignore          # Files to exclude from Docker build
 ├── .env.example           # Example environment variables
 ├── Dockerfile             # Docker configuration
 ├── docker-compose.yml     # Docker Compose configuration
-├── deploy.sh              # Deployment script
 ├── egg-nemesis.json       # Pterodactyl egg (JSON format)
-├── egg-nemesis.yml        # Pterodactyl egg (YAML format)
 ├── package.json           # Project metadata and scripts
 ├── pnpm-lock.yaml         # Lock file for dependencies
 └── tsconfig.json          # TypeScript configuration
@@ -179,13 +147,17 @@ nemesis/
 
 ## 🐳 Docker
 
-This project includes a multi-stage Dockerfile and Docker Compose configuration:
-
-### Development
+This project uses Docker as the primary development and deployment method, with a multi-stage Dockerfile and Docker Compose configuration:
 
 ```bash
+# Start development environment
 docker compose up
+
+# Start production environment
+docker compose up app-prod
 ```
+
+The development environment provides:
 
 - Hot reload enabled
 - Source code mounted as a volume
@@ -193,7 +165,6 @@ docker compose up
 
 ## 📝 Available Scripts
 
-- `pnpm dev` - Start development server
 - `pnpm build` - Build for production
 - `pnpm start` - Start production server
 - `pnpm test` - Run tests and build
@@ -201,39 +172,6 @@ docker compose up
 - `pnpm v:patch` - Version bump patch (0.0.x)
 - `pnpm v:minor` - Version bump minor (0.x.0)
 - `pnpm v:major` - Version bump major (x.0.0)
-
-## 🤖 Discord Bot Sharding
-
-This template includes support for Discord.js sharding, which helps distribute your bot's load across multiple processes when it grows to serve more guilds.
-
-### What is Sharding?
-
-Discord requires sharding for bots in 2,500+ guilds. Sharding splits your bot into multiple processes, each handling a portion of the guilds, which:
-
-- Reduces memory usage and CPU load per process
-- Improves performance by distributing workload
-- Is required by Discord for larger bots
-
-### Using Sharding
-
-Sharding can be enabled/disabled through:
-
-**Environment Variables**:
-
-- `ENABLE_SHARDING`: Set to "true" to enable sharding
-- `TOTAL_SHARDS`: Number of shards to spawn, or "auto" to let Discord.js decide
-
-You can enable sharding by setting these environment variables before starting your bot:
-
-```bash
-# Enable sharding with environment variables
-ENABLE_SHARDING=true node .
-
-# Or with a specific number of shards
-ENABLE_SHARDING=true TOTAL_SHARDS=2 node .
-```
-
-This approach gives you more flexibility since it doesn't rely on predefined scripts. Instead, you can control sharding directly through environment variables when starting the bot. This keeps things simpler and gives you more control over the configuration.
 
 ## 🚢 CI/CD
 
@@ -271,3 +209,7 @@ This template is licensed under the MIT License - see the LICENSE file for detai
 3. Customize the Docker setup if needed
 4. Update environment variables in .env.example
 5. Add your application code to the src directory
+
+## 🤖 Discord Bot Features
+
+If you're looking to use this template for a Discord bot, please see [DISCORD.md](DISCORD.md) for specific Discord.js integration features and configuration.
