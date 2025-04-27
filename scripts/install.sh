@@ -3,11 +3,9 @@
 #
 # Server Files: /mnt/server
 apt update
-apt install -y curl wget tar jq file unzip make gcc g++ python3 python3-dev python3-pip libtool
-
 # Install Node.js (from NodeSource, latest LTS version)
 curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
-apt install -y nodejs
+apt install -y curl wget tar jq file unzip make gcc g++ python3 python3-dev python3-pip libtool nodejs
 
 # Install pnpm
 npm install -g pnpm
@@ -109,9 +107,16 @@ echo "Extracting files..."
 tar -xzf bot.tar.gz -C "$DEPLOY_DIR"
 rm bot.tar.gz checksum.txt
 
+# Move into deployment directory
+cd "$DEPLOY_DIR"
+
 # Install dependencies
 echo "Installing dependencies..."
 pnpm install --production
+
+# Migrate database
+echo "Migrating database..."
+pnpx prisma migrate deploy
 
 echo "Release has been installed from ${GITHUB_USER}/${REPOSITORY} (tag: ${TAG})."
 
