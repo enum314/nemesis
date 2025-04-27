@@ -4,7 +4,14 @@
 # Server Files: /mnt/server
 apt update
 apt install -y curl wget tar jq file unzip make gcc g++ python3 python3-dev python3-pip libtool
+
+# Install Node.js (from NodeSource, latest LTS version)
+curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+apt install -y nodejs
+
+# Install pnpm
 npm install -g pnpm
+pnpm config set store-dir /mnt/server/.pnpm-store
 
 # Set repository variables from egg
 GITHUB_USER="${GITHUB_USERNAME:-enum314}"
@@ -107,6 +114,5 @@ echo "Installing dependencies..."
 pnpm install --production
 
 echo "Release has been installed from ${GITHUB_USER}/${REPOSITORY} (tag: ${TAG})."
-echo "Server will start on port {{server.build.default.port}} as configured in .env"
 
 exit 0
