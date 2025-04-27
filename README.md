@@ -8,10 +8,10 @@ This is a template repository that provides a solid foundation for building mode
 
 The template offers:
 
-- **Ready-to-use infrastructure** with Docker, CI/CD workflows, and deployment scripts
+- **Ready-to-use infrastructure** with CI/CD workflows and deployment scripts
 - **Modern tech stack** with Node.js 22 and PNPM 10
 - **Development best practices** baked in from the start
-- **Production-ready configuration** for immediate deployment with Docker
+- **Production-ready configuration** for immediate deployment
 - **Pterodactyl integration** for easy hosting on game server panels
 - **Clean imports** using Node.js subpath imports to avoid relative path hell
 
@@ -19,7 +19,6 @@ The template offers:
 
 - [Node.js](https://nodejs.org/) v22 or later
 - [PNPM](https://pnpm.io/) v10 or later
-- [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/)
 - [Git](https://git-scm.com/)
 
 ## 🛠️ Getting Started
@@ -43,29 +42,24 @@ cd your-new-repo
 # Customize for your project
 # - Update package.json with your project details
 # - Modify .env.example for your environment variables
-# - Customize the Dockerfile if needed
 # - Update this README!
 
 # Install dependencies
 pnpm install
 
 # Start development server
-docker compose up
+pnpm dev
 ```
 
 ### Local Development
 
 ```bash
-# Start development environment with Docker
-docker compose up
+# Install dependencies
+pnpm install
+
+# Start development environment
+pnpm dev
 ```
-
-This development environment includes:
-
-- Hot reload enabled
-- Source code mounted as a volume
-- Running on port 3001 (In case you want to expose an express.js server)
-- Development dependencies included
 
 ## 🚢 Deployment Options
 
@@ -91,7 +85,7 @@ The template includes Pterodactyl egg files for deployment on Pterodactyl game s
 
 3. **Configurable Options**:
 
-   - **Startup Command**: Customize how the application starts (default: `prisma migrate deploy && node .`)
+   - **Startup Command**: Customize how the application starts (default: `node .`)
    - **GitHub Repository Settings**:
      - **GitHub Username**: Username of the repository owner
      - **GitHub Repository**: Name of the repository to clone
@@ -100,32 +94,26 @@ The template includes Pterodactyl egg files for deployment on Pterodactyl game s
 
 4. **After Installation**:
    - The server will automatically install your project from the specified GitHub repository
-   - It will configure the correct port in .env
-   - On each startup, the update script will:
-     - Clean the dist/ directory
-     - Download the latest release from GitHub
-     - Verify the integrity of the downloaded files
-     - Extract the release
-     - Install production dependencies
-   - The server will then run your specified startup command
 
-### Update Script
+### Installation Script
 
-The template includes an automatic update script (`scripts/update.sh`) that runs before the main application starts on Pterodactyl. This script:
+The template includes an installation script (`scripts/install.sh`) used by the Pterodactyl egg. This script:
 
-- Retrieves the latest release from your GitHub repository
-- Cleans up the dist/ directory to ensure a fresh deployment
-- Verifies file integrity with checksums
-- Installs production dependencies with `pnpm install --production`
+- Sets up the application environment
+- Configures the correct port in .env
+- Installs dependencies with `pnpm install --production`
+- Runs database migration with `pnpx prisma migrate deploy`
 
-The update script uses environment variables set in the Pterodactyl egg:
+The installation script uses environment variables set in the Pterodactyl egg:
 
 - `GITHUB_USERNAME` - GitHub username for the repository
 - `GITHUB_REPOSITORY` - Name of the repository
 - `GITHUB_TAG` - Release tag to fetch (default: latest)
 - `GITHUB_TOKEN` - Optional token for private repositories
 
-This ensures your application is always running the latest release with all dependencies properly installed.
+This ensures your application is properly set up with all dependencies installed.
+
+Usually within egg-nemesis.json
 
 ## 🏗️ Template Structure
 
@@ -134,12 +122,9 @@ nemesis/
 ├── .github/workflows/     # GitHub Actions CI/CD configurations
 ├── scripts/               # Utility scripts
 │   └── install.sh         # Install script for Pterodactyl (Used in egg-nemesis.json)
-│   └── update.sh          # Auto-update script for Pterodactyl
 ├── src/                   # Application source code
-├── .dockerignore          # Files to exclude from Docker build
+├── docs/                  # Documentation
 ├── .env.example           # Example environment variables
-├── Dockerfile             # Docker configuration
-├── docker-compose.yml     # Docker Compose configuration
 ├── egg-nemesis.json       # Pterodactyl egg (JSON format)
 ├── package.json           # Project metadata and scripts
 ├── pnpm-lock.yaml         # Lock file for dependencies
@@ -189,9 +174,8 @@ This template is licensed under the MIT License - see the LICENSE file for detai
 
 1. Replace this README with information specific to your project
 2. Update package.json with your project details
-3. Customize the Docker setup if needed
-4. Update environment variables in .env.example
-5. Add your application code to the src directory
+3. Update environment variables in .env.example
+4. Add your application code to the src directory
 
 ## 🤖 Discord Bot Features
 
