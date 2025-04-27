@@ -100,7 +100,6 @@ The template includes Pterodactyl egg files for deployment on Pterodactyl game s
 The template includes an installation script (`scripts/install.sh`) used by the Pterodactyl egg. This script:
 
 - Sets up the application environment
-- Configures the correct port in .env
 - Installs dependencies with `pnpm install --production`
 - Runs database migration with `pnpx prisma migrate deploy`
 
@@ -112,8 +111,6 @@ The installation script uses environment variables set in the Pterodactyl egg:
 - `GITHUB_TOKEN` - Optional token for private repositories
 
 This ensures your application is properly set up with all dependencies installed.
-
-Usually within egg-nemesis.json
 
 ## 🏗️ Template Structure
 
