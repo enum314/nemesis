@@ -97,11 +97,7 @@ The template includes Pterodactyl egg files for deployment on Pterodactyl game s
 
 ### Installation Script
 
-The template includes an installation script (`scripts/install.sh`) used by the Pterodactyl egg. This script:
-
-- Sets up the application environment
-- Installs dependencies with `pnpm install --production`
-- Runs database migration with `pnpx prisma migrate deploy`
+The template includes an installation script (`scripts/install.sh`) used by the Pterodactyl egg.
 
 The installation script uses environment variables set in the Pterodactyl egg:
 
@@ -110,7 +106,39 @@ The installation script uses environment variables set in the Pterodactyl egg:
 - `GITHUB_TAG` - Release tag to fetch (default: latest)
 - `GITHUB_TOKEN` - Optional token for private repositories
 
-This ensures your application is properly set up with all dependencies installed.
+The `install.sh` script is embedded within `egg-nemesis.json` and executes the following process when a server is deployed:
+
+1. **Environment Setup**:
+
+   - Updates package lists and installs Node.js 22.x
+   - Installs required dependencies (curl, wget, tar, jq, etc.)
+   - Installs PNPM and configures its package store
+
+2. **Configuration**:
+
+   - Sets variables based on Pterodactyl egg inputs (`GITHUB_USERNAME`, `GITHUB_REPOSITORY`, etc.)
+   - Handles defaults for missing values (e.g., username defaults to "enum314")
+
+3. **Release Download**:
+
+   - Determines the GitHub release URL based on the specified tag
+   - Supports two download paths:
+     - **Private repositories**: Uses GitHub API with token authentication
+     - **Public repositories**: Uses direct GitHub release download URLs
+   - Downloads both the application archive (`bot.tar.gz`) and checksum file
+
+4. **Security Verification**:
+
+   - Calculates SHA-256 checksum of the downloaded archive
+   - Compares against the expected checksum file
+   - Aborts installation if verification fails, protecting against corrupted or tampered files
+
+5. **Installation**:
+   - Extracts the application to the server directory
+   - Installs production dependencies using PNPM
+   - Runs database migrations via Prisma
+
+This automated process ensures consistent, secure deployments with minimal manual intervention.
 
 ## 🏗️ Template Structure
 
