@@ -4,7 +4,7 @@
 # Server Files: /mnt/server
 apt update
 apt install -y curl wget tar jq file unzip make gcc g++ python3 python3-dev python3-pip libtool
-wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.bashrc" SHELL="$(which bash)" bash -
+npm install -g pnpm
 
 # Set repository variables from egg
 GITHUB_USER="${GITHUB_USERNAME:-enum314}"
@@ -13,11 +13,6 @@ TAG="${GITHUB_TAG:-latest}"
 TOKEN="${GITHUB_TOKEN}"
 
 DEPLOY_DIR="/mnt/server"
-
-# Make sure pterodactyl user can use pnpm
-export PNPM_HOME="/usr/local/pnpm"
-export PATH="$PNPM_HOME:$PATH"
-pnpm config set store-dir /mnt/server/.pnpm-store
 
 # Ensure deployment directory exists
 if [ ! -d "$DEPLOY_DIR" ]; then
