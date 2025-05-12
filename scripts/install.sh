@@ -102,6 +102,12 @@ fi
 
 echo "Checksum verification successful!"
 
+# Remove dist directory if it exists to ensure a clean build
+if [ -d "$DEPLOY_DIR/dist" ]; then
+    echo "Removing dist directory..."
+    rm -rf "$DEPLOY_DIR/dist"
+fi
+
 # Extract to server directory
 echo "Extracting files..."
 tar -xzf bot.tar.gz -C "$DEPLOY_DIR"
