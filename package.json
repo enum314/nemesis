@@ -18,7 +18,7 @@
         "v:major": "npm version major -m \"chore(release): %s\" --sign-git-tag"
     },
     "dependencies": {
-        "@prisma/client": "6.6.0",
+        "@prisma/client": "6.8.2",
         "discord.js": "^14.19.3",
         "dotenv": "^16.5.0",
         "is-plain-object": "^5.0.0",
