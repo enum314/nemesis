@@ -31,7 +31,7 @@ importers:
         version: 9.2.0
       rate-limiter-flexible:
         specifier: ^7.1.0
-        version: 7.1.0
+        version: 7.1.1
       winston:
         specifier: ^3.17.0
         version: 3.17.0
@@ -92,7 +92,7 @@ importers:
         version: 6.0.1
       tsc-watch:
         specifier: ^6.2.1
-        version: 6.2.1(typescript@5.8.3)
+        version: 6.3.1(typescript@5.8.3)
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -1171,8 +1171,8 @@ packages:
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  rate-limiter-flexible@7.1.0:
-    resolution: {integrity: sha512-qXYzKWzlTOf7/BNjz1Jj03AgtTHoJZZAiiJ3hjLf8sqeG+EWZLeQ3xYtMPlMZLonlq+OyJUueHyK/H+q2Zc7Qw==}
+  rate-limiter-flexible@7.1.1:
+    resolution: {integrity: sha512-lsYRcqRSJrKBNt6pMzBJTiCJP5KnwsGWdObMZxd19JFUJRntM+yuHs4/2bs6NZweSLgpsDcykvzyQaumoslWQg==}
 
   readable-stream@3.6.2:
     resolution: {integrity: sha512-9u/sniCrY3D5WdsERHzHE4G2YCXqoG5FTHUiCC4SIbr6XcLZBY05ya9EKjYek9O5xOAwjGq+1JdGBAS7Q9ScoA==}
@@ -1311,8 +1311,8 @@ packages:
   ts-mixer@6.0.4:
     resolution: {integrity: sha512-ufKpbmrugz5Aou4wcr5Wc1UUFWOLhq+Fm6qa6P0w0K5Qw2yhaUoiWszhCVuNQyNwrlGiscHOmqYoAox1PtvgjA==}
 
-  tsc-watch@6.2.1:
-    resolution: {integrity: sha512-GLwdz5Dy9K3sVm3RzgkLcyDpl5cvU9HEcE1A3gf5rqEwlUe7gDLxNCgcuNEw3zoKOiegMo3LnbF1t6HLqxhrSA==}
+  tsc-watch@6.3.1:
+    resolution: {integrity: sha512-x1hNJ/m1Cln2OvNJJLPsnWI1pObm+Jq9jF6kyz0flEy/ym7Y9TvU9edg6lXLuGVkhDClwBWi8aWAFE0qgzEkzw==}
     engines: {node: '>=12.12.0'}
     hasBin: true
     peerDependencies:
@@ -2548,7 +2548,7 @@ snapshots:
 
   queue-microtask@1.2.3: {}
 
-  rate-limiter-flexible@7.1.0: {}
+  rate-limiter-flexible@7.1.1: {}
 
   readable-stream@3.6.2:
     dependencies:
@@ -2662,7 +2662,7 @@ snapshots:
 
   ts-mixer@6.0.4: {}
 
-  tsc-watch@6.2.1(typescript@5.8.3):
+  tsc-watch@6.3.1(typescript@5.8.3):
     dependencies:
       cross-spawn: 7.0.6
       node-cleanup: 2.1.2
