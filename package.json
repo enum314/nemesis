@@ -28,7 +28,7 @@
         "rate-limiter-flexible": "^7.1.1",
         "winston": "^3.17.0",
         "yaml": "^2.8.0",
-        "zod": "^3.25.20"
+        "zod": "^3.25.32"
     },
     "devDependencies": {
         "@commitlint/cli": "^19.8.1",
@@ -37,9 +37,9 @@
         "@types/express": "^5.0.2",
         "@types/ms": "^2.1.0",
         "@types/mustache": "^4.2.6",
-        "@types/node": "^22.15.21",
-        "@typescript-eslint/eslint-plugin": "^8.32.1",
-        "@typescript-eslint/parser": "^8.32.1",
+        "@types/node": "^22.15.23",
+        "@typescript-eslint/eslint-plugin": "^8.33.0",
+        "@typescript-eslint/parser": "^8.33.0",
         "eslint": "^9.27.0",
         "eslint-config-prettier": "^10.1.5",
         "eslint-plugin-prettier": "^5.4.0",
