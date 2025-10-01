@@ -8,7 +8,7 @@ import {
   InteractionCollector,
 } from "discord.js";
 
-import { mustache } from "./mustache";
+import { mustache } from "./mustache.js";
 
 export async function paginate(
   interaction: ChatInputCommandInteraction<"cached">,
