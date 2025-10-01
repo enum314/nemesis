@@ -233,7 +233,7 @@ if (!isShardProcess) {
   client.logger.info(`[Discord] Connecting...`);
 }
 
-client.once("ready", async () => {
+client.once("clientReady", async () => {
   // We'll handle the ready log in the ready event file
   // since we want that log to appear for both non-sharded and sharded instances
 
