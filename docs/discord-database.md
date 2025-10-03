@@ -19,7 +19,7 @@ You can import and use the database client in any part of your application:
 
 ```typescript
 // Example usage in a command
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 
 import { Command } from "#classes/command";
 import { db } from "#lib/db";
@@ -44,7 +44,7 @@ command.run(async (interaction) => {
 
   await interaction.reply({
     content: `Profile found! Created: ${userProfile.createdAt.toLocaleDateString()}`,
-    ephemeral: true,
+    flags: [MessageFlags.Ephemeral],
   });
 });
 ```

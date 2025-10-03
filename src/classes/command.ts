@@ -1,6 +1,7 @@
 import {
   AutocompleteInteraction,
   ChatInputCommandInteraction,
+  MessageFlags,
   SlashCommandBuilder,
   SlashCommandSubcommandBuilder,
   SlashCommandSubcommandGroupBuilder,
@@ -31,7 +32,7 @@ export class Command {
     this._runner = async (interaction) => {
       await interaction.reply({
         content: "This command is not implemented yet.",
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
       });
     };
 
