@@ -18,6 +18,9 @@ const client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildVoiceStates,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildInvites,
   ],
 });
 
@@ -39,7 +42,15 @@ function addCommand(command: Command, log = true) {
   }
 }
 
-function addEvent(event: Event<keyof ClientEvents>, log = true) {
+async function addEvent(
+  client: Client<true>,
+  event: Event<keyof ClientEvents>,
+  log = true
+) {
+  if (event.name === "clientReady") {
+    await event.run(client);
+  }
+
   if (event.once) {
     client.once(event.name, (...args) => {
       event.run(client as Client<true>, ...args);
@@ -96,7 +107,7 @@ async function loadAddons() {
         }
 
         for (const event of events) {
-          addEvent(event, false);
+          await addEvent(client as Client<true>, event, false);
         }
 
         for (const configuration of configurations) {
@@ -168,7 +179,9 @@ async function loadEvents() {
         const event = module.default;
         const eventName = event.name;
 
-        if (event.once) {
+        if (eventName === "clientReady") {
+          await event.run(client);
+        } else if (event.once) {
           client.once(eventName, (...args) => {
             event.run(client, ...args);
           });
