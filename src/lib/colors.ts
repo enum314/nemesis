@@ -1,0 +1,36 @@
+import { z } from "zod";
+
+export const colors = [
+  "Default",
+  "White",
+  "Aqua",
+  "Green",
+  "Blue",
+  "Yellow",
+  "Purple",
+  "LuminousVividPink",
+  "Fuchsia",
+  "Gold",
+  "Orange",
+  "Red",
+  "Grey",
+  "Navy",
+  "DarkAqua",
+  "DarkGreen",
+  "DarkBlue",
+  "DarkPurple",
+  "DarkVividPink",
+  "DarkGold",
+  "DarkOrange",
+  "DarkRed",
+  "DarkGrey",
+  "DarkerGrey",
+  "LightGrey",
+  "DarkNavy",
+  "Blurple",
+  "Greyple",
+  "DarkButNotBlack",
+  "NotQuiteBlack",
+] as const;
+
+export const color = z.enum(colors);
