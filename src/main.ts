@@ -4,19 +4,20 @@ import ms from "ms";
 
 import { env } from "#lib/env";
 import { Logger } from "#lib/logger";
-import { initializeBot } from "#root/sharding";
+
+import { initializeBot } from "./sharding.js";
 
 const startingTime = Date.now();
 
 // Start the bot with or without sharding
 (async () => {
   try {
-    await initializeBot(env.SHARDING, {
-      totalShards: env.SHARDS,
+    await initializeBot(env.DISCORD_SHARDING, {
+      totalShards: env.DISCORD_SHARDS,
       // Additional options can be configured here
     });
 
-    if (env.SHARDING) {
+    if (env.DISCORD_SHARDING) {
       Logger.info(`Done! ${ms(Date.now() - startingTime)}`);
     }
   } catch (error) {

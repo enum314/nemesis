@@ -18,8 +18,8 @@
         "lib": [
             "esnext"
         ],
-        "module": "ESNext",
-        "moduleResolution": "bundler",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
         "newLine": "lf",
         "noEmitHelpers": true,
         "noFallthroughCasesInSwitch": true,
@@ -35,6 +35,7 @@
         "strict": true,
         "target": "ESNext",
         "useDefineForClassFields": true,
+        "rootDir": "src",
         "outDir": "dist",
         "baseUrl": "src",
         "paths": {

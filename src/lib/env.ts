@@ -8,11 +8,11 @@ export const env = createEnv({
 
     DATABASE_URL: z.string().url(),
 
-    SHARDING: z
+    DISCORD_SHARDING: z
       .string()
       .refine((s) => s === "true" || s === "false")
       .transform((s) => s === "true"),
-    SHARDS: z.union([z.literal("auto"), z.coerce.number().min(1)]),
+    DISCORD_SHARDS: z.union([z.literal("auto"), z.coerce.number().min(1)]),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,
