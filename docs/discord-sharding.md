@@ -16,17 +16,17 @@ Sharding is managed through the `main.ts` file which reads environment variables
 
 **Environment Variables**:
 
-- `ENABLE_SHARDING`: Set to "true" to enable sharding
-- `TOTAL_SHARDS`: Number of shards to spawn, or "auto" to let Discord.js decide
+- `SHARDING`: Set to "true" to enable sharding
+- `SHARDS`: Number of shards to spawn, or "auto" to let Discord.js decide
 
 You can enable sharding by setting these environment variables before starting your bot:
 
 ```bash
 # Enable sharding with environment variables
-ENABLE_SHARDING=true node .
+SHARDING=true node .
 
 # Or with a specific number of shards
-ENABLE_SHARDING=true TOTAL_SHARDS=2 node .
+SHARDING=true SHARDS=2 node .
 ```
 
 The sharding implementation is handled in `src/sharding.ts` and automatically manages shard creation, monitoring, and error handling.
