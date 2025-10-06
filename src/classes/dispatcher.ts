@@ -98,7 +98,7 @@ export class Dispatcher {
 
       const rest = new REST().setToken(this.client.token);
 
-      rest.put(
+      await rest.put(
         env.DISCORD_GUILD_ID
           ? Routes.applicationGuildCommands(
               this.client.user.id,
