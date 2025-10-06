@@ -19,7 +19,7 @@
             "esnext"
         ],
         "module": "ESNext",
-        "moduleResolution": "Node",
+        "moduleResolution": "bundler",
         "newLine": "lf",
         "noEmitHelpers": true,
         "noFallthroughCasesInSwitch": true,
