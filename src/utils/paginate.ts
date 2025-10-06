@@ -48,7 +48,7 @@ export async function paginate(
         }),
       }),
     ],
-    fetchReply: true,
+    withResponse: true,
     components: [
       ...(embeds.length === 1 ? [] : [row]),
       ...(opts?.rows[

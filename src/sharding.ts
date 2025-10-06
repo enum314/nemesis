@@ -45,10 +45,6 @@ export async function initializeBot(
 
   const token = options.token || env.DISCORD_TOKEN;
 
-  if (!token) {
-    throw new Error("No Discord token provided for sharding");
-  }
-
   // Create and configure the ShardingManager
   const manager = new ShardingManager(shardFile, {
     token,

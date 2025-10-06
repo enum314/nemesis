@@ -1,4 +1,4 @@
-import { registerAddon } from "#functions/loader";
+import { registerAddon } from "#lib/registerAddon";
 
 export default registerAddon({
   id: "welcomer",

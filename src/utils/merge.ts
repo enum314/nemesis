@@ -1,40 +1,43 @@
-function isPlainObject(value: any) {
-  if (typeof value !== "object" || value === null) {
-    return false;
-  }
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  if (typeof value !== "object" || value === null) return false;
 
-  const prototype = Object.getPrototypeOf(value);
+  const proto = Object.getPrototypeOf(value);
   return (
-    (prototype === null ||
-      prototype === Object.prototype ||
-      Object.getPrototypeOf(prototype) === null) &&
+    (proto === null ||
+      proto === Object.prototype ||
+      Object.getPrototypeOf(proto) === null) &&
     !(Symbol.toStringTag in value) &&
     !(Symbol.iterator in value)
   );
 }
 
-export function merge(
-  target: Record<string, unknown>,
+export function merge<T extends Record<string, unknown>>(
+  target: T,
   source: Record<string, unknown>,
   options = { clone: true }
-) {
-  const output = options.clone ? { ...target } : target;
+): T {
+  const output: Record<string, unknown> = options.clone
+    ? { ...target }
+    : target;
 
   if (isPlainObject(target) && isPlainObject(source)) {
-    Object.keys(source).forEach((key) => {
-      if (key === "__proto__") return;
+    for (const key of Object.keys(source)) {
+      if (key === "__proto__") continue;
 
-      if (isPlainObject(source[key]) && key in target) {
+      const sourceVal = source[key];
+      const targetVal = (target as Record<string, unknown>)[key];
+
+      if (isPlainObject(sourceVal) && isPlainObject(targetVal)) {
         output[key] = merge(
-          target[key] as Record<string, unknown>,
-          source[key] as Record<string, unknown>,
+          targetVal as Record<string, unknown>,
+          sourceVal as Record<string, unknown>,
           options
         );
       } else {
-        output[key] = source[key];
+        output[key] = sourceVal;
       }
-    });
+    }
   }
 
-  return output;
+  return output as T;
 }

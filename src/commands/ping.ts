@@ -4,9 +4,7 @@ import { Command } from "#classes/command";
 
 const command = new Command(
   new SlashCommandBuilder().setName("ping").setDescription("Replies with pong!")
-);
-
-command.run(async (interaction) => {
+).run(async (interaction) => {
   const sent = await interaction.reply({
     content: "Pinging...",
     withResponse: true,

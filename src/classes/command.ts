@@ -18,6 +18,10 @@ type CommandAutocompleter = (
   interaction: AutocompleteInteraction<"cached">
 ) => Promise<void> | void;
 
+type CommandInhibitor = (
+  interaction: ChatInputCommandInteraction<"cached">
+) => Promise<boolean> | boolean;
+
 type CommandBuilder =
   | SlashCommandBuilder
   | SlashCommandSubcommandBuilder
@@ -27,6 +31,7 @@ type CommandBuilder =
 export class Command {
   private _runner!: CommandRunner;
   private _autocompleter: CommandAutocompleter | null;
+  private _inhibitors: CommandInhibitor[] = [];
 
   public constructor(public readonly builder: CommandBuilder) {
     this._runner = async (interaction) => {
@@ -47,12 +52,22 @@ export class Command {
     return this.builder.description ?? "";
   }
 
+  public get inhibitors(): CommandInhibitor[] {
+    return this._inhibitors;
+  }
+
   public get runner(): CommandRunner {
     return this._runner;
   }
 
   public get autocompleter(): CommandAutocompleter | null {
     return this._autocompleter;
+  }
+
+  public inhibit(inhibitor: CommandInhibitor): this {
+    this._inhibitors.push(inhibitor);
+
+    return this;
   }
 
   public run(runner: CommandRunner): this {

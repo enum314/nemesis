@@ -1,13 +1,7 @@
-import {
-  ApplicationCommand,
-  ChatInputCommandInteraction,
-  Client,
-  REST,
-  Routes,
-} from "discord.js";
+import { ChatInputCommandInteraction, Client, REST, Routes } from "discord.js";
+import { deepEqual } from "fast-equals";
+import yaml from "yaml";
 
-import type { Command } from "#classes/command";
-import { inhibitors } from "#functions/inhibitors";
 import { env } from "#lib/env";
 import { existsFile, readFile, writeFile } from "#lib/fs";
 
@@ -26,65 +20,17 @@ export class Dispatcher {
       command.builder.toJSON()
     );
 
-    if (!this.client.application?.owner) {
-      await this.client.application?.fetch();
-    }
-
     let modified = false;
 
-    if (await existsFile(["cache.json"])) {
-      try {
-        const currentCommands = JSON.parse(
-          (await readFile(["cache.json"])).toString()
-        );
+    if (await existsFile(["cache.yml"])) {
+      const buffer = await readFile(["cache.yml"]);
 
-        const newCommands = commands.filter(
-          (command) =>
-            !currentCommands.some(
-              (c: { name: string }) => c.name === command.name
-            )
-        );
+      const data = yaml.parse(buffer.toString());
 
-        if (newCommands.length) {
-          throw new Error();
-        }
-
-        const deletedCommands = currentCommands.filter(
-          (command: { name: string }) =>
-            !commands.some((c) => c.name === command.name)
-        );
-
-        if (deletedCommands.length) {
-          throw new Error();
-        }
-
-        const updatedCommands = commands.filter((command) =>
-          currentCommands.some((c: { name: string }) => c.name === command.name)
-        );
-
-        for (const updatedCommand of updatedCommands) {
-          const previousCommand = currentCommands.find(
-            (c: { name: string }) => c.name === updatedCommand.name
-          );
-
-          if (!previousCommand) continue;
-
-          if (previousCommand.description !== updatedCommand.description) {
-            throw new Error();
-          }
-
-          if (
-            !ApplicationCommand.optionsEqual(
-              previousCommand.options ?? [],
-              updatedCommand.options ?? []
-            )
-          ) {
-            throw new Error();
-          }
-        }
-      } catch (_err) {
-        modified = true;
-      }
+      modified = !deepEqual(
+        JSON.parse(JSON.stringify(data)),
+        JSON.parse(JSON.stringify(commands))
+      );
     } else {
       modified = true;
     }
@@ -110,7 +56,7 @@ export class Dispatcher {
         }
       );
 
-      await writeFile(["cache.json"], JSON.stringify(commands));
+      await writeFile(["cache.yml"], yaml.stringify(commands));
 
       this.client.logger.info(
         `[Dispatcher] ${commands.length} Slash Command${
@@ -120,16 +66,20 @@ export class Dispatcher {
     }
   }
 
-  private async inihibit(
-    interaction: ChatInputCommandInteraction<"cached">,
-    command: Command
+  private async inhibit(
+    inhibitors: ((
+      interaction: ChatInputCommandInteraction<"cached">
+    ) => Promise<boolean> | boolean)[],
+    interaction: ChatInputCommandInteraction<"cached">
   ) {
     for (const inhibitor of inhibitors) {
-      if (!(await Promise.resolve(inhibitor(interaction, command)))) {
-        return true;
-      }
+      // if the inhibitor returns false, stop the chain immediately
+      const shouldContinue = await Promise.resolve(inhibitor(interaction));
+      if (!shouldContinue) return false;
     }
-    return false;
+
+    // all inhibitors returned true — continue
+    return true;
   }
 
   public async initialize() {
@@ -145,52 +95,36 @@ export class Dispatcher {
       if (
         interaction.user.bot ||
         this.awaiting.has(interaction.user.id) ||
-        !interaction.isChatInputCommand() ||
-        !interaction.inCachedGuild()
+        !interaction.inCachedGuild() ||
+        !(interaction.isChatInputCommand() || interaction.isAutocomplete())
       ) {
         return;
       }
 
       const command = this.client.commands.get(interaction.commandName);
 
-      if (!command) {
-        return;
-      }
+      if (!command) return;
 
       this.awaiting.add(interaction.user.id);
 
-      if (!(await this.inihibit(interaction, command))) {
-        await command.runner(interaction);
+      try {
+        if (interaction.isChatInputCommand()) {
+          if (await this.inhibit(command.inhibitors, interaction)) {
+            await command.runner(interaction);
+          }
+        } else if (interaction.isAutocomplete()) {
+          if (command.autocompleter) {
+            await command.autocompleter(interaction);
+          }
+        }
+      } catch (err) {
+        this.client.logger.error(
+          `[Dispatcher] Error handling ${interaction.commandName}:`,
+          err
+        );
+      } finally {
+        this.awaiting.delete(interaction.user.id);
       }
-
-      this.awaiting.delete(interaction.user.id);
-    });
-
-    this.client.on("interactionCreate", async (interaction) => {
-      if (
-        interaction.user.bot ||
-        this.awaiting.has(interaction.user.id) ||
-        !interaction.isAutocomplete() ||
-        !interaction.inCachedGuild()
-      ) {
-        return;
-      }
-
-      const command = this.client.commands.get(interaction.commandName);
-
-      if (!command) {
-        return;
-      }
-
-      if (!command.autocompleter) {
-        return;
-      }
-
-      this.awaiting.add(interaction.user.id);
-
-      await command.autocompleter(interaction);
-
-      this.awaiting.delete(interaction.user.id);
     });
   }
 }

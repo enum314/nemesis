@@ -6,5 +6,5 @@ logs/
 configs/**/*.json
 configs/**/*.yml
 tsconfig.tsbuildinfo
-cache.json
+cache.yml
 data/

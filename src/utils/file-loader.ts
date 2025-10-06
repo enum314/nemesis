@@ -28,6 +28,7 @@ export async function getAllFiles(dirPath: string[]): Promise<string[]> {
         const subFiles = await getAllFiles([
           path.join(...dirPath, dirent.name),
         ]);
+
         files.push(...subFiles);
       } else if (dirent.isFile() && dirent.name.endsWith(".js")) {
         // Only include .js

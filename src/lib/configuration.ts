@@ -1,4 +1,4 @@
-import { deepStrictEqual } from "assert";
+import { deepEqual } from "fast-equals";
 import yaml from "yaml";
 import type { z } from "zod";
 
@@ -40,11 +40,9 @@ export class Configuration<ConfigurationStructure> {
   }
 
   public async get() {
-    if (!this.cache) {
-      await this.load();
-    }
+    if (!this.cache) await this.load();
 
-    return this.cache;
+    return this.cache ?? this.data.defaults;
   }
 
   public async update(partial: Partial<ConfigurationStructure>) {
@@ -122,17 +120,10 @@ export class Configuration<ConfigurationStructure> {
           throw response.error;
         }
 
-        try {
-          deepStrictEqual(response.data, fileData);
-        } catch (_err) {
-          // Only update if there are real differences that need to be written back
-          // This prevents unnecessary overwrites
-          const stringifiedOriginal = JSON.stringify(fileData);
-          const stringifiedNew = JSON.stringify(response.data);
+        if (!deepEqual(response.data, fileData)) {
+          this.cache = response.data;
 
-          if (stringifiedOriginal !== stringifiedNew) {
-            await this.update(response.data);
-          }
+          await this.update(response.data);
         }
 
         return response.data;
