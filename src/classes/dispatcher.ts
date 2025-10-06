@@ -2,6 +2,7 @@ import { ChatInputCommandInteraction, Client, REST, Routes } from "discord.js";
 import { deepEqual } from "fast-equals";
 import yaml from "yaml";
 
+import type { Command } from "#classes/command";
 import { env } from "#lib/env";
 import { existsFile, readFile, writeFile } from "#lib/fs";
 
@@ -68,13 +69,17 @@ export class Dispatcher {
 
   private async inhibit(
     inhibitors: ((
-      interaction: ChatInputCommandInteraction<"cached">
+      interaction: ChatInputCommandInteraction<"cached">,
+      command: Command
     ) => Promise<boolean> | boolean)[],
-    interaction: ChatInputCommandInteraction<"cached">
+    interaction: ChatInputCommandInteraction<"cached">,
+    command: Command
   ) {
     for (const inhibitor of inhibitors) {
       // if the inhibitor returns false, stop the chain immediately
-      const shouldContinue = await Promise.resolve(inhibitor(interaction));
+      const shouldContinue = await Promise.resolve(
+        inhibitor(interaction, command)
+      );
       if (!shouldContinue) return false;
     }
 
@@ -109,7 +114,7 @@ export class Dispatcher {
 
       try {
         if (interaction.isChatInputCommand()) {
-          if (await this.inhibit(command.inhibitors, interaction)) {
+          if (await this.inhibit(command.inhibitors, interaction, command)) {
             await command.runner(interaction);
           }
         } else if (interaction.isAutocomplete()) {

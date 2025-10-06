@@ -26,7 +26,6 @@
         "ms": "^2.1.3",
         "mustache": "^4.2.0",
         "pretty-ms": "^9.3.0",
-        "rate-limiter-flexible": "^7.4.0",
         "winston": "^3.17.0",
         "yaml": "^2.8.1",
         "zod": "^3.25.76"
@@ -56,7 +55,7 @@
         "#classes/*": "./dist/classes/*.js",
         "#lib/*": "./dist/lib/*.js",
         "#utils/*": "./dist/utils/*.js",
-        "#functions/*": "./dist/functions/*.js",
+        "#inhibitors/*": "./dist/inhibitors/*.js",
         "#events/*": "./dist/events/*.js",
         "#commands/*": "./dist/commands/*.js",
         "#configs/*": "./dist/configs/*.js",

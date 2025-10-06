@@ -32,9 +32,6 @@ importers:
       pretty-ms:
         specifier: ^9.3.0
         version: 9.3.0
-      rate-limiter-flexible:
-        specifier: ^7.4.0
-        version: 7.4.0
       winston:
         specifier: ^3.17.0
         version: 3.17.0
@@ -1286,9 +1283,6 @@ packages:
 
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
-
-  rate-limiter-flexible@7.4.0:
-    resolution: {integrity: sha512-IJopePGO6HnMWVdeLCihnxXZ0WCW0mxXiU5LE3bZ00GHESsCaAvgD8hN/ATIJeZhnrVdU5cfRyS1uV63Vmc4zg==}
 
   rc9@2.1.2:
     resolution: {integrity: sha512-btXCnMmRIBINM2LDZoEmOogIZU7Qe7zn4BpomSKZ/ykbLObuBdvG+mFq11DL6fjH1DRwHhrlgtYWG96bJiC7Cg==}
@@ -2780,8 +2774,6 @@ snapshots:
   pure-rand@6.1.0: {}
 
   queue-microtask@1.2.3: {}
-
-  rate-limiter-flexible@7.4.0: {}
 
   rc9@2.1.2:
     dependencies:

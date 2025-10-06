@@ -19,7 +19,8 @@ type CommandAutocompleter = (
 ) => Promise<void> | void;
 
 type CommandInhibitor = (
-  interaction: ChatInputCommandInteraction<"cached">
+  interaction: ChatInputCommandInteraction<"cached">,
+  command: Command
 ) => Promise<boolean> | boolean;
 
 type CommandBuilder =
@@ -64,7 +65,7 @@ export class Command {
     return this._autocompleter;
   }
 
-  public inhibit(inhibitor: CommandInhibitor): this {
+  public use(inhibitor: CommandInhibitor): this {
     this._inhibitors.push(inhibitor);
 
     return this;
