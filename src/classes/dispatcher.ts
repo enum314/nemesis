@@ -8,6 +8,7 @@ import {
 
 import type { Command } from "#classes/command";
 import { inhibitors } from "#functions/inhibitors";
+import { env } from "#lib/env";
 import { existsFile, readFile, writeFile } from "#lib/fs";
 
 export class Dispatcher {
@@ -98,10 +99,12 @@ export class Dispatcher {
       const rest = new REST().setToken(this.client.token);
 
       rest.put(
-        Routes.applicationGuildCommands(
-          this.client.user.id,
-          process.env.DISCORD_GUILD_ID as string
-        ),
+        env.DISCORD_GUILD_ID
+          ? Routes.applicationGuildCommands(
+              this.client.user.id,
+              env.DISCORD_GUILD_ID
+            )
+          : Routes.applicationCommands(this.client.user.id),
         {
           body: commands,
         }

@@ -4,6 +4,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { ShardingManager } from "discord.js";
 
+import { env } from "#lib/env";
 import { Logger, setAsShardManager } from "#lib/logger";
 
 // Get the directory name of the current module
@@ -33,6 +34,7 @@ export async function initializeBot(
   // If sharding is disabled, just import and run the bot directly
   if (!useSharding) {
     await import("./index.js");
+
     return;
   }
 
@@ -40,7 +42,9 @@ export async function initializeBot(
   setAsShardManager();
 
   // Get token from options or environment variable
-  const token = options.token || process.env.DISCORD_TOKEN;
+
+  const token = options.token || env.DISCORD_TOKEN;
+
   if (!token) {
     throw new Error("No Discord token provided for sharding");
   }
