@@ -48,17 +48,15 @@ async function addEvent(
   log = true
 ) {
   if (event.name === "clientReady") {
-    await event.run(client);
-  }
-
-  if (event.once) {
-    client.once(event.name, (...args) => {
-      event.run(client as Client<true>, ...args);
-    });
+    await event.runner(client);
+  } else if (event.once) {
+    client.once(event.name, (...args) =>
+      event.runner(client as Client<true>, ...args)
+    );
   } else {
-    client.on(event.name, (...args) => {
-      event.run(client as Client<true>, ...args);
-    });
+    client.on(event.name, (...args) =>
+      event.runner(client as Client<true>, ...args)
+    );
   }
 
   client.events.set(event.name, event);
@@ -174,27 +172,8 @@ async function loadEvents() {
       const filePath = `./${file}`;
       const module = await import(filePath);
 
-      // Check if the file exports an Event instance
       if (module.default instanceof Event) {
-        const event = module.default;
-        const eventName = event.name;
-
-        if (eventName === "clientReady") {
-          await event.run(client);
-        } else if (event.once) {
-          client.once(eventName, (...args) => {
-            event.run(client, ...args);
-          });
-        } else {
-          client.on(eventName, (...args) => {
-            event.run(client, ...args);
-          });
-        }
-
-        client.events.set(eventName, event);
-        if (!isShardProcess) {
-          client.logger.info(`- ${eventName}`);
-        }
+        await addEvent(client as Client<true>, module.default);
       }
     } catch (error) {
       if (!isShardProcess) {
