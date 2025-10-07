@@ -6,23 +6,18 @@ import { mustache } from "#utils/mustache";
 
 const cooldowns = new Collection<string, Map<string, number>>();
 
-/**
- * Creates a cooldown middleware.
- * @param seconds The cooldown duration in seconds.
- * @param message Optional message with {{remaining}} placeholder.
- */
-export function cooldown(
+export function cooldown<T extends boolean>(
   seconds: number,
-  message: `${string}{{remaining}}${string}` = "Please wait **{{remaining}}** before using this command again."
+  opts: { message?: `${string}{{remaining}}${string}`; trigger?: T } = {}
 ): CommandMiddleware<
   CommandBaseContext,
-  {
-    cooldown: {
-      trigger: () => void;
-    };
-  }
+  T extends true ? { cooldown: { trigger: () => void } } : {}
 > {
   const duration = seconds * 1000;
+
+  const message =
+    opts?.message ??
+    "Please wait **{{remaining}}** before using this command again.";
 
   return async (ctx) => {
     const { interaction } = ctx;
@@ -53,16 +48,17 @@ export function cooldown(
       }
     }
 
-    return {
-      cooldown: {
-        trigger: () => {
-          // Set new cooldown
-          timestamps.set(userId, now + duration);
-
-          // Auto-cleanup after expiration
-          setTimeout(() => timestamps.delete(userId), duration);
-        },
-      },
+    const trigger = () => {
+      timestamps.set(userId, now + duration);
+      setTimeout(() => timestamps.delete(userId), duration);
     };
+
+    if (opts?.trigger) {
+      return { cooldown: { trigger } } as any;
+    }
+
+    trigger();
+
+    return {};
   };
 }
