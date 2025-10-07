@@ -1,13 +1,18 @@
 import { Event } from "#classes/event";
 
-const event = new Event("messageCreate", (client, message) => {
-  // Ignore bot messages
-  if (message.author.bot) return;
+export default new Event("messageCreate")
+  .parallel([
+    () => ({ a: Math.floor(Math.random() * 100) }),
+    () => ({ b: Math.floor(Math.random() * 100) }),
+    () => ({ c: Math.floor(Math.random() * 100) }),
+    () => ({ d: Math.floor(Math.random() * 100) }),
+    () => ({ e: Math.floor(Math.random() * 100) }),
+  ])
+  .run(({ client, ...ctx }, message) => {
+    // Log messages for demonstration
+    client.logger.info(
+      `Message received from ${message.author.tag}: ${message.content}`
+    );
 
-  // Log messages for demonstration
-  client.logger.info(
-    `Message received from ${message.author.tag}: ${message.content}`
-  );
-});
-
-export default event;
+    client.logger.info(`Context: ${JSON.stringify(ctx, null, 2)}`);
+  });
