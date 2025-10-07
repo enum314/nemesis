@@ -51,8 +51,8 @@
             "#utils/*": [
                 "./utils/*"
             ],
-            "#inhibitors/*": [
-                "./inhibitors/*"
+            "#middlewares/*": [
+                "./middlewares/*"
             ],
             "#events/*": [
                 "./events/*"

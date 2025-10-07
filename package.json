@@ -55,7 +55,7 @@
         "#classes/*": "./dist/classes/*.js",
         "#lib/*": "./dist/lib/*.js",
         "#utils/*": "./dist/utils/*.js",
-        "#inhibitors/*": "./dist/inhibitors/*.js",
+        "#middlewares/*": "./dist/middlewares/*.js",
         "#events/*": "./dist/events/*.js",
         "#commands/*": "./dist/commands/*.js",
         "#configs/*": "./dist/configs/*.js",
