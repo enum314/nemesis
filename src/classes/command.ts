@@ -109,7 +109,7 @@ export class Command<
     return next;
   }
 
-  override parallel<NextContexts extends object[]>(fns: {
+  public override parallel<NextContexts extends object[]>(fns: {
     [K in keyof NextContexts]: CommandMiddleware<Context, NextContexts[K]>;
   }): Command<Context & UnionToIntersection<NextContexts[number]>, Self> {
     const next = super.parallel(fns) as unknown as Command<
