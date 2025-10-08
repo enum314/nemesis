@@ -1,14 +1,27 @@
 services:
   db:
-    container_name: nemesis-mariadb
-    image: mariadb:12
+    container_name: nemesis-mysql
+    image: mysql:latest
     environment:
-      MARIADB_ROOT_PASSWORD: nemesis
-      MARIADB_DATABASE: nemesis
-      MARIADB_USER: nemesis
-      MARIADB_PASSWORD: nemesis
+      MYSQL_ROOT_PASSWORD: nemesis
+      MYSQL_DATABASE: nemesis
     volumes:
-      - ./data/mariadb:/var/lib/mysql
+      - ./data/mysql:/var/lib/mysql
     ports:
       - "3306:3306"
     restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-pnemesis",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
