@@ -5,10 +5,10 @@ import {
 } from "discord.js";
 
 import type { Addon } from "#classes/addon";
-import { Command } from "#classes/command";
+import type { Command } from "#classes/command";
+import type { Configuration } from "#classes/configuration";
 import { Dispatcher } from "#classes/dispatcher";
 import { Event } from "#classes/event";
-import type { Configuration } from "#lib/configuration";
 import { Logger } from "#lib/logger";
 
 export class Client<

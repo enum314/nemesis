@@ -6,8 +6,8 @@ import ms from "ms";
 import { Addon } from "#classes/addon";
 import { Client } from "#classes/client";
 import { Command } from "#classes/command";
+import { Configuration } from "#classes/configuration";
 import { Event } from "#classes/event";
-import { Configuration } from "#lib/configuration";
 import { setCurrentShardId, setDiscordClient } from "#lib/logger";
 import { getAllFiles } from "#utils/file-loader";
 

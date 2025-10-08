@@ -2,8 +2,8 @@ import type { ClientEvents } from "discord.js";
 
 import { Addon, type AddonOptions } from "#classes/addon";
 import { Command } from "#classes/command";
+import { Configuration } from "#classes/configuration";
 import { Event } from "#classes/event";
-import { Configuration } from "#lib/configuration";
 import client, { isShardProcess } from "#root/index";
 import { getAllFiles } from "#utils/file-loader";
 
