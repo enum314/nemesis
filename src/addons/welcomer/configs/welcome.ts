@@ -2,23 +2,15 @@ import { z } from "zod";
 
 import { Configuration } from "#lib/configuration";
 
-// Define schema for welcome configuration
-const welcomeConfigSchema = z
-  .object({
+// Create a configuration for welcome channel
+const welcomeConfig = new Configuration({
+  name: "welcome",
+  type: "yaml",
+  schema: z.strictObject({
     welcomeChannelId: z.string(),
     welcomeMessage: z.string(),
     welcomeColor: z.string(),
-  })
-  .strict();
-
-// Type for the welcome configuration
-type WelcomeConfig = z.infer<typeof welcomeConfigSchema>;
-
-// Create a configuration for welcome channel
-const welcomeConfig = new Configuration<WelcomeConfig>({
-  name: "welcome",
-  type: "yaml",
-  schema: welcomeConfigSchema,
+  }),
   defaults: {
     welcomeChannelId: "",
     welcomeMessage:
