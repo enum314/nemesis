@@ -1,0 +1,14 @@
+services:
+  db:
+    container_name: nemesis-mariadb
+    image: mariadb:12
+    environment:
+      MARIADB_ROOT_PASSWORD: nemesis
+      MARIADB_DATABASE: nemesis
+      MARIADB_USER: nemesis
+      MARIADB_PASSWORD: nemesis
+    volumes:
+      - ./data/mariadb:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
