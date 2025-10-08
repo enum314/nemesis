@@ -12,21 +12,17 @@ import {
 import { Logger } from "#lib/logger";
 import { merge } from "#utils/merge";
 
-export class Configuration<ConfigurationStructure> {
-  private cache!: ConfigurationStructure;
+export class Configuration<
+  ConfigurationSchema extends z.ZodObject<{}, z.core.$strict>,
+> {
+  private cache!: z.core.output<ConfigurationSchema>;
 
   public constructor(
     public readonly data: {
       name: string;
       type: "json" | "yaml";
-      schema: z.ZodObject<
-        any,
-        "strict",
-        z.ZodTypeAny,
-        ConfigurationStructure,
-        ConfigurationStructure
-      >;
-      defaults: ConfigurationStructure;
+      schema: ConfigurationSchema;
+      defaults: z.infer<ConfigurationSchema>;
       addon?: string;
     }
   ) {}
@@ -45,7 +41,7 @@ export class Configuration<ConfigurationStructure> {
     return this.cache ?? this.data.defaults;
   }
 
-  public async update(partial: Partial<ConfigurationStructure>) {
+  public async update(partial: Partial<z.core.output<ConfigurationSchema>>) {
     const response = this.data.schema.safeParse(partial);
 
     if (!response.success) {
@@ -54,16 +50,9 @@ export class Configuration<ConfigurationStructure> {
 
     const current = await this.get();
 
-    const data = merge(
-      merge(
-        this.data.defaults as Record<string, unknown>,
-        current as Record<string, unknown>
-      ),
-      partial,
-      {
-        clone: true,
-      }
-    ) as ConfigurationStructure;
+    const data = merge(merge(this.data.defaults, current), partial, {
+      clone: true,
+    }) as z.core.output<ConfigurationSchema>;
 
     const fileExtension = this.data.type === "json" ? "json" : "yml";
     const fileName = `${this.data.name}.${fileExtension}`;
@@ -85,7 +74,7 @@ export class Configuration<ConfigurationStructure> {
     return { data, error: null };
   }
 
-  private async _load() {
+  private async _load(): Promise<z.core.output<ConfigurationSchema> | null> {
     const fileExtension = this.data.type === "json" ? "json" : "yml";
     const fileName = `${this.data.name}.${fileExtension}`;
 
@@ -111,7 +100,7 @@ export class Configuration<ConfigurationStructure> {
             : yaml.parse(buffer.toString());
 
         const response = this.data.schema.safeParse(
-          merge(this.data.defaults as Record<string, unknown>, fileData, {
+          merge(this.data.defaults, fileData, {
             clone: true,
           })
         );
@@ -146,62 +135,3 @@ export class Configuration<ConfigurationStructure> {
     return this.data.defaults;
   }
 }
-
-/**
- * Example Usage:
- *
- * ```typescript
- * import { z } from "zod";
- * import { Configuration } from "./configuration";
- *
- * // Define your configuration schema using Zod
- * const appConfigSchema = z.object({
- *   appName: z.string(),
- *   version: z.string(),
- *   port: z.number().int().positive(),
- *   features: z.object({
- *     enableLogging: z.boolean(),
- *     maxLogSize: z.number().positive().optional()
- *   }),
- *   apiKeys: z.record(z.string())
- * });
- *
- * // Define the type from your schema
- * type AppConfig = z.infer<typeof appConfigSchema>;
- *
- * // Create default configuration values
- * const defaultConfig: AppConfig = {
- *   appName: "MyApplication",
- *   version: "1.0.0",
- *   port: 3000,
- *   features: {
- *     enableLogging: true
- *   },
- *   apiKeys: {}
- * };
- *
- * // Initialize your configuration
- * const appConfig = new Configuration<AppConfig>({
- *   name: "app-config",  // Will create/use "configs/app-config.json" or "configs/app-config.yml"
- *   type: "json",        // Use "json" or "yaml"
- *   schema: appConfigSchema,
- *   defaults: defaultConfig
- * });
- *
- * // Initialize in your app's startup
- * async function initializeApp() {
- *   await appConfig.load();
- *
- *   // Retrieve the config
- *   const config = await appConfig.get();
- *   console.log(`Starting ${config.appName} v${config.version} on port ${config.port}`);
- *
- *   // Update a configuration value
- *   await appConfig.update({
- *     features: {
- *       enableLogging: false
- *     }
- *   });
- * }
- * ```
- */
