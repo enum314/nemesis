@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Configuration } from "#lib/configuration";
+import { Configuration } from "#classes/configuration";
 
 // Create a configuration for goodbye channel
 const goodbyeConfig = new Configuration({
