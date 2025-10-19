@@ -74,6 +74,10 @@ export class Configuration<
     return { data, error: null };
   }
 
+  public async reload() {
+    await this._load();
+  }
+
   private async _load(): Promise<z.core.output<ConfigurationSchema> | null> {
     const fileExtension = this.data.type === "json" ? "json" : "yml";
     const fileName = `${this.data.name}.${fileExtension}`;

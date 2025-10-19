@@ -69,10 +69,12 @@ async function addEvent(
 async function addConfiguration(configuration: Configuration<any>, log = true) {
   await configuration.load();
 
-  client.configurations.set(configuration.data.name, configuration);
+  const key = `${configuration.data.addon ? `${configuration.data.addon}/` : ""}${configuration.data.name}.${configuration.data.type === "json" ? "json" : "yml"}`;
+
+  client.configurations.set(key, configuration);
 
   if (!isShardProcess && log) {
-    client.logger.info(`- ${configuration.data.name}`);
+    client.logger.info(`- ${key}`);
   }
 }
 
@@ -151,10 +153,6 @@ async function loadCommands() {
       }
     }
   }
-
-  if (!isShardProcess && commandFiles.length > 0) {
-    client.logger.info(`[Commands] Loaded`);
-  }
 }
 
 /**
@@ -181,10 +179,6 @@ async function loadEvents() {
         client.logger.error(error);
       }
     }
-  }
-
-  if (!isShardProcess && eventFiles.length > 0) {
-    client.logger.info(`[Events] Loaded`);
   }
 }
 
@@ -214,10 +208,6 @@ async function loadConfigurations() {
         client.logger.error(error);
       }
     }
-  }
-
-  if (!isShardProcess && configurationFiles.length > 0) {
-    client.logger.info(`[Configurations] Loaded`);
   }
 }
 
