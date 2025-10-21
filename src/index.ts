@@ -69,12 +69,10 @@ async function addEvent(
 async function addConfiguration(configuration: Configuration<any>, log = true) {
   await configuration.load();
 
-  const key = `${configuration.data.addon ? `${configuration.data.addon}/` : ""}${configuration.data.name}.${configuration.data.type}`;
-
-  client.configurations.set(key, configuration);
+  client.configurations.set(configuration.name, configuration);
 
   if (!isShardProcess && log) {
-    client.logger.info(`- ${key}`);
+    client.logger.info(`- ${configuration.name}`);
   }
 }
 
