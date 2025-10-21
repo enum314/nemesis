@@ -28,17 +28,13 @@ export class Configuration<
   ) {}
 
   public async reload() {
-    const key = this._cacheKey();
-
-    cache.delete(key);
+    cache.delete(this.name);
 
     await this.load();
   }
 
   public async load() {
-    const key = this._cacheKey();
-
-    if (cache.has(key)) {
+    if (cache.has(this.name)) {
       return;
     }
 
@@ -46,16 +42,14 @@ export class Configuration<
 
     if (!data) return;
 
-    cache.set(key, data);
+    cache.set(this.name, data);
   }
 
   public async get() {
-    const key = this._cacheKey();
-
-    if (!cache.has(key)) await this.load();
+    if (!cache.has(this.name)) await this.load();
 
     return (
-      (cache.get(key) as z.core.output<ConfigurationSchema>) ??
+      (cache.get(this.name) as z.core.output<ConfigurationSchema>) ??
       this.data.defaults
     );
   }
@@ -88,7 +82,7 @@ export class Configuration<
         : yaml.stringify(data)
     );
 
-    cache.set(this._cacheKey(), data);
+    cache.set(this.name, data);
 
     return { data, error: null };
   }
@@ -129,7 +123,7 @@ export class Configuration<
         }
 
         if (!deepEqual(response.data, fileData)) {
-          cache.set(this._cacheKey(), response.data);
+          cache.set(this.name, response.data);
 
           await this.update(response.data);
 
@@ -137,7 +131,7 @@ export class Configuration<
         }
 
         // Save to global cache
-        cache.set(this._cacheKey(), response.data);
+        cache.set(this.name, response.data);
         return response.data;
       } catch (err) {
         Logger.error(
@@ -156,12 +150,12 @@ export class Configuration<
     );
 
     // Save defaults to global cache on first write
-    cache.set(this._cacheKey(), this.data.defaults);
+    cache.set(this.name, this.data.defaults);
 
     return this.data.defaults;
   }
 
-  private _cacheKey() {
+  public get name() {
     return `${this.data.addon ? `${this.data.addon}/` : ""}${this.data.name}.${this.data.type}`;
   }
 }
