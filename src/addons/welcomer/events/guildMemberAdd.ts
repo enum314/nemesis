@@ -1,40 +1,55 @@
-import { EmbedBuilder, userMention } from "discord.js";
+import path from "path";
+import { AttachmentBuilder, EmbedBuilder, userMention } from "discord.js";
 
-import welcomeConfig from "#addons/welcomer/configs/welcome";
+import welcomeConfig from "#addons/welcomer/configs/welcomer";
 import { Event } from "#classes/event";
 import { mustache } from "#utils/mustache";
 
-const event = new Event("guildMemberAdd")
-  .use(async () => ({ config: await welcomeConfig.get() }))
-  .run(async ({ config }, member) => {
-    // If channel is not set, do nothing
-    if (!config.welcomeChannelId) return;
+export default new Event("guildMemberAdd").run(async ({}, member) => {
+  // Get the configuration
+  const config = await welcomeConfig.get();
 
-    // Get the channel
-    const welcomeChannel = member.guild.channels.cache.get(
-      config.welcomeChannelId
-    );
-    if (!welcomeChannel || !welcomeChannel.isTextBased()) return;
+  // If channel is not set, do nothing
+  if (!config.welcomeChannelId) return;
 
-    // Create welcome message
-    const welcomeMessage = mustache(config.welcomeMessage, {
-      user: userMention(member.id),
-    });
+  // Get the channel
+  const welcomeChannel = member.guild.channels.cache.get(
+    config.welcomeChannelId
+  );
 
-    // Create embed
-    const embed = new EmbedBuilder()
-      .setColor(config.welcomeColor as `#${string}`)
-      .setTitle(`Welcome to ${member.guild.name}!`)
-      .setDescription(welcomeMessage)
-      .setThumbnail(member.user.displayAvatarURL({ size: 1024 }))
-      .setTimestamp()
-      .setFooter({
-        text: `Member #${member.guild.memberCount}`,
-        iconURL: member.guild.iconURL() || undefined,
-      });
+  if (!welcomeChannel || !welcomeChannel.isSendable()) return;
 
-    // Send welcome message
-    await welcomeChannel.send({ embeds: [embed] });
+  // Create welcome message
+  const welcomeMessage = mustache(config.welcomeMessage, {
+    user: userMention(member.id),
   });
 
-export default event;
+  const file = config.welcomeImage
+    ? new AttachmentBuilder(
+        path.join(process.cwd(), "assets", config.welcomeImage)
+      )
+    : null;
+
+  // Create embed
+  const embed = new EmbedBuilder()
+    .setColor(config.welcomeColor)
+    .setTitle(`Welcome ${member.user.username}!`)
+    .setDescription(welcomeMessage)
+    .setThumbnail(member.user.displayAvatarURL())
+    .setTimestamp();
+
+  if (config.welcomeImage) {
+    embed.setImage(`attachment://${config.welcomeImage}`);
+  }
+
+  // Send welcome message
+  await welcomeChannel.send({
+    content: userMention(member.id),
+    embeds: [embed],
+    ...(file
+      ? {
+          files: [file],
+        }
+      : {}),
+  });
+});
