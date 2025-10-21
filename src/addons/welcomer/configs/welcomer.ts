@@ -15,7 +15,8 @@ export default new Configuration({
   }),
   defaults: {
     welcomeChannelId: "",
-    welcomeMessage: "",
+    welcomeMessage:
+      "Welcome {{user}} to the server! We hope you enjoy your stay!",
     welcomeColor: "Default",
     welcomeImage: "",
   },
