@@ -1,3 +1,5 @@
+import { Constants } from "#utils/constants";
+
 // This is a helper function to format dates into a human-readable format (e.g. January 1, 2021)
 export function formatDate(
   input: string | number | Date,
@@ -20,12 +22,11 @@ export function formatDate(
 // This is a helper function to format prices into a currency format (e.g. 1999 = $19.99)
 export function formatPrice(
   price: number | string,
-  currency: string = "USD",
   notation: "compact" | "engineering" | "scientific" | "standard" = "standard"
 ) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency,
+    currency: Constants.currency,
     notation,
     maximumFractionDigits: 2,
   }).format(Number(price) / 100); // Assuming amounts are stored in micro-units

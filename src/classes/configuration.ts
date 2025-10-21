@@ -12,11 +12,11 @@ import {
 import { Logger } from "#lib/logger";
 import { merge } from "#utils/merge";
 
+const cache = new Map<string, any>();
+
 export class Configuration<
   ConfigurationSchema extends z.ZodObject<{}, z.core.$strict>,
 > {
-  private cache!: z.core.output<ConfigurationSchema>;
-
   public constructor(
     public readonly data: {
       name: string;
@@ -27,18 +27,37 @@ export class Configuration<
     }
   ) {}
 
+  public async reload() {
+    const key = this._cacheKey();
+
+    cache.delete(key);
+
+    await this.load();
+  }
+
   public async load() {
+    const key = this._cacheKey();
+
+    if (cache.has(key)) {
+      return;
+    }
+
     const data = await this._load();
 
     if (!data) return;
 
-    this.cache = data;
+    cache.set(key, data);
   }
 
   public async get() {
-    if (!this.cache) await this.load();
+    const key = this._cacheKey();
 
-    return this.cache ?? this.data.defaults;
+    if (!cache.has(key)) await this.load();
+
+    return (
+      (cache.get(key) as z.core.output<ConfigurationSchema>) ??
+      this.data.defaults
+    );
   }
 
   public async update(partial: Partial<z.core.output<ConfigurationSchema>>) {
@@ -69,13 +88,9 @@ export class Configuration<
         : yaml.stringify(data)
     );
 
-    this.cache = data;
+    cache.set(this._cacheKey(), data);
 
     return { data, error: null };
-  }
-
-  public async reload() {
-    await this._load();
   }
 
   private async _load(): Promise<z.core.output<ConfigurationSchema> | null> {
@@ -114,11 +129,15 @@ export class Configuration<
         }
 
         if (!deepEqual(response.data, fileData)) {
-          this.cache = response.data;
+          cache.set(this._cacheKey(), response.data);
 
           await this.update(response.data);
+
+          return response.data;
         }
 
+        // Save to global cache
+        cache.set(this._cacheKey(), response.data);
         return response.data;
       } catch (err) {
         Logger.error(
@@ -136,6 +155,13 @@ export class Configuration<
         : yaml.stringify(this.data.defaults)
     );
 
+    // Save defaults to global cache on first write
+    cache.set(this._cacheKey(), this.data.defaults);
+
     return this.data.defaults;
+  }
+
+  private _cacheKey() {
+    return `${this.data.addon ? `${this.data.addon}/` : ""}${this.data.name}.${this.data.type}`;
   }
 }

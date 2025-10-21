@@ -34,3 +34,5 @@ export const colors = [
 ] as const;
 
 export const color = z.enum(colors);
+
+export type Color = (typeof colors)[number];
