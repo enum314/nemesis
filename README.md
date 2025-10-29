@@ -9,7 +9,7 @@ This is a template repository that provides a solid foundation for building mode
 The template offers:
 
 - **Ready-to-use infrastructure** with CI/CD workflows and deployment scripts
-- **Modern tech stack** with Node.js 22 and PNPM 10
+- **Modern tech stack** with Node.js 24 and PNPM 10
 - **Development best practices** baked in from the start
 - **Production-ready configuration** for immediate deployment
 - **Pterodactyl integration** for easy hosting on game server panels
@@ -17,7 +17,7 @@ The template offers:
 
 ## 📋 Prerequisites
 
-- [Node.js](https://nodejs.org/) v22 or later
+- [Node.js](https://nodejs.org/) v24 or later
 - [PNPM](https://pnpm.io/) v10 or later
 - [Git](https://git-scm.com/)
 
@@ -26,7 +26,6 @@ The template offers:
 ### Using This Template
 
 1. **Create a new repository from this template**:
-
    - Click the green "Use this template" button at the top of the GitHub repository page
    - Select "Create a new repository"
    - Name your new project and configure repository settings
@@ -72,19 +71,16 @@ The template includes Pterodactyl egg files for deployment on Pterodactyl game s
 #### How to Use the Pterodactyl Egg:
 
 1. **Import to Pterodactyl Panel**:
-
    - Log in to your Pterodactyl admin panel
    - Go to Nests > Import Egg
    - Upload the `egg-nemesis.json` file
 
 2. **Create a New Server**:
-
    - In the Pterodactyl admin panel, create a new server
    - Select the Nemesis egg from the list
    - Configure server settings including port allocations and resources
 
 3. **Configurable Options**:
-
    - **Startup Command**: Customize how the application starts (default: `node .`)
    - **GitHub Repository Settings**:
      - **GitHub Username**: Username of the repository owner
@@ -109,18 +105,15 @@ The installation script uses environment variables set in the Pterodactyl egg:
 The `install.sh` script is embedded within `egg-nemesis.json` and executes the following process when a server is deployed:
 
 1. **Environment Setup**:
-
    - Updates package lists and installs Node.js 22.x
    - Installs required dependencies (curl, wget, tar, jq, etc.)
    - Installs PNPM and configures its package store
 
 2. **Configuration**:
-
    - Sets variables based on Pterodactyl egg inputs (`GITHUB_USERNAME`, `GITHUB_REPOSITORY`, etc.)
    - Handles defaults for missing values (e.g., username defaults to "enum314")
 
 3. **Release Download**:
-
    - Determines the GitHub release URL based on the specified tag
    - Supports two download paths:
      - **Private repositories**: Uses GitHub API with token authentication
@@ -128,7 +121,6 @@ The `install.sh` script is embedded within `egg-nemesis.json` and executes the f
    - Downloads both the application archive (`bot.tar.gz`) and checksum file
 
 4. **Security Verification**:
-
    - Calculates SHA-256 checksum of the downloaded archive
    - Compares against the expected checksum file
    - Aborts installation if verification fails, protecting against corrupted or tampered files
