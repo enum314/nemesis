@@ -18,6 +18,7 @@
         "v:major": "npm version major -m \"chore(release): %s\" --sign-git-tag"
     },
     "dependencies": {
+        "@prisma/adapter-better-sqlite3": "^7.1.0",
         "@prisma/client": "7.1.0",
         "@t3-oss/env-core": "^0.13.8",
         "discord.js": "^14.25.1",
@@ -102,6 +103,7 @@
         "onlyBuiltDependencies": [
             "@prisma/client",
             "@prisma/engines",
+            "better-sqlite3",
             "esbuild",
             "prisma"
         ]

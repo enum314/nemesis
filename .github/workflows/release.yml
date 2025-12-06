@@ -43,6 +43,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - run: pnpx prisma generate
+
       - name: Build project
         run: pnpm build
 
@@ -56,7 +58,7 @@ jobs:
           mkdir -p release
 
           # Create the bot.tar.gz archive excluding src and node_modules
-          tar --exclude='./.git' --exclude='./.github' --exclude='./.husky' --exclude='./.vscode' --exclude='./docs' --exclude='./node_modules' --exclude='./release' --exclude='./scripts' --exclude='./src' -czf release/bot.tar.gz .
+          tar --exclude='./.git' --exclude='./.github' --exclude='./.husky' --exclude='./.vscode' --exclude='./docs' --exclude='./node_modules' --exclude='./release' --exclude='./src' -czf release/bot.tar.gz .
 
           # Create checksum file
           cd release

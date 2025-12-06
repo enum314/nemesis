@@ -42,20 +42,11 @@
             "#root/*": [
                 "./*"
             ],
+            "#addons/*": [
+                "./addons/*"
+            ],
             "#classes/*": [
                 "./classes/*"
-            ],
-            "#lib/*": [
-                "./lib/*"
-            ],
-            "#utils/*": [
-                "./utils/*"
-            ],
-            "#middlewares/*": [
-                "./middlewares/*"
-            ],
-            "#events/*": [
-                "./events/*"
             ],
             "#commands/*": [
                 "./commands/*"
@@ -63,8 +54,17 @@
             "#configs/*": [
                 "./configs/*"
             ],
-            "#addons/*": [
-                "./addons/*"
+            "#events/*": [
+                "./events/*"
+            ],
+            "#lib/*": [
+                "./lib/*"
+            ],
+            "#middlewares/*": [
+                "./middlewares/*"
+            ],
+            "#utils/*": [
+                "./utils/*"
             ]
         }
     },

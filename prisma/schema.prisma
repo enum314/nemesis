@@ -9,9 +9,7 @@ generator client {
 }
 
 datasource db {
-    provider     = "mysql"
-    url          = env("DATABASE_URL")
-    relationMode = "foreignKeys"
+    provider = "mysql"
 }
 
 model User {
