@@ -93,16 +93,12 @@ The template includes Pterodactyl egg files for deployment on Pterodactyl game s
 
 ### Installation Script
 
-The template includes an installation script (`scripts/install.sh`) used by the Pterodactyl egg.
-
 The installation script uses environment variables set in the Pterodactyl egg:
 
 - `GITHUB_USERNAME` - GitHub username for the repository
 - `GITHUB_REPOSITORY` - Name of the repository
 - `GITHUB_TAG` - Release tag to fetch (default: latest)
 - `GITHUB_TOKEN` - Optional token for private repositories
-
-The `install.sh` script is embedded within `egg-nemesis.json` and executes the following process when a server is deployed:
 
 1. **Environment Setup**:
    - Updates package lists and installs Node.js 22.x
@@ -137,14 +133,19 @@ This automated process ensures consistent, secure deployments with minimal manua
 ```
 nemesis/
 ├── .github/workflows/     # GitHub Actions CI/CD configurations
-├── scripts/               # Utility scripts
-│   └── install.sh         # Install script for Pterodactyl (Used in egg-nemesis.json)
-├── src/                   # Application source code
+├── .vscode/               # VSCode Settings
+├── assets/                # Assets folder
+├── configs/               # Configurations Directory
 ├── docs/                  # Documentation
+├── prisma/                # Prisma Schema and Migrations
+├── src/                   # Application source code
 ├── .env.example           # Example environment variables
 ├── egg-nemesis.json       # Pterodactyl egg (JSON format)
+├── eslint.config.js       # ESLint Configuration
+├── LICENSE                # License
 ├── package.json           # Project metadata and scripts
 ├── pnpm-lock.yaml         # Lock file for dependencies
+├── prisma.config.ts       # Prisma Configuratioon File
 └── tsconfig.json          # TypeScript configuration
 ```
 
@@ -152,8 +153,9 @@ nemesis/
 
 - `pnpm build` - Build for production
 - `pnpm start` - Start production server
-- `pnpm test` - Run tests and build
+- `pnpm dev` - Run development server
 - `pnpm lint` - Check for code style issues
+- `pnpm format` - Format code
 - `pnpm v:patch` - Version bump patch (0.0.x)
 - `pnpm v:minor` - Version bump minor (0.x.0)
 - `pnpm v:major` - Version bump major (x.0.0)
