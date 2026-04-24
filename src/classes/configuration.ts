@@ -55,17 +55,19 @@ export class Configuration<
   }
 
   public async update(partial: Partial<z.core.output<ConfigurationSchema>>) {
-    const response = this.data.schema.safeParse(partial);
+    const current = await this.get();
+
+    const merged = merge(merge(this.data.defaults, current), partial, {
+      clone: true,
+    }) as z.core.output<ConfigurationSchema>;
+
+    const response = this.data.schema.safeParse(merged);
 
     if (!response.success) {
       return { data: null, error: response.error };
     }
 
-    const current = await this.get();
-
-    const data = merge(merge(this.data.defaults, current), partial, {
-      clone: true,
-    }) as z.core.output<ConfigurationSchema>;
+    const data = response.data;
 
     const fileExtension = this.data.type === "json" ? "json" : "yml";
     const fileName = `${this.data.name}.${fileExtension}`;
@@ -156,6 +158,6 @@ export class Configuration<
   }
 
   public get name() {
-    return `${this.data.addon ? `${this.data.addon}/` : ""}${this.data.name}.${this.data.type}`;
+    return `${this.data.addon ? `${this.data.addon}/` : ""}${this.data.name}.${this.data.type === "json" ? "json" : "yml"}`;
   }
 }
