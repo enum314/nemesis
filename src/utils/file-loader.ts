@@ -2,6 +2,8 @@ import { existsSync } from "fs";
 import { readdir } from "fs/promises";
 import path from "path";
 
+import { Logger } from "#lib/logger";
+
 /**
  * Recursively get all files from a directory
  * @param dirPath Directory path to search
@@ -39,7 +41,8 @@ export async function getAllFiles(dirPath: string[]): Promise<string[]> {
     return files;
   } catch (error) {
     // Log error but don't throw, return empty array instead
-    console.error(`Error reading directory ${fullPath}:`, error);
+    Logger.error(`Error reading directory ${fullPath}:`, error);
+
     return [];
   }
 }
