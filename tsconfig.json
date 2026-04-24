@@ -37,7 +37,6 @@
         "useDefineForClassFields": true,
         "rootDir": "src",
         "outDir": "dist",
-        "baseUrl": "src",
         "paths": {
             "#root/*": [
                 "./*"
