@@ -28,7 +28,7 @@ export class Mutex {
         const waiter = (_: () => void) => {
           // Check timeout periodically
           if (timeout !== undefined && Date.now() - start >= timeout) {
-            reject(new Error("Mutex lock timed out"));
+            reject(new MutexLockTimeoutError("Mutex lock timed out"));
 
             return;
           }
@@ -49,7 +49,7 @@ export class Mutex {
 
               clearInterval(interval);
 
-              reject(new Error("Mutex lock timed out"));
+              reject(new MutexLockTimeoutError("Mutex lock timed out"));
             }
           }, 10);
         }
@@ -62,7 +62,7 @@ export class Mutex {
 
     Reflect.set(this, "__reentrancy__", 1);
 
-    // Return release fn
+    // Return release function
     return () => this.unlock(ownerToken);
   }
 
@@ -94,5 +94,12 @@ export class Mutex {
   /** Check if currently locked */
   isLocked(): boolean {
     return this.locked;
+  }
+}
+
+export class MutexLockTimeoutError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "MutexLockTimeoutError";
   }
 }
