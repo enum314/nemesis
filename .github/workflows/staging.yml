@@ -2,7 +2,7 @@ name: Staging
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   pre_ci:
@@ -26,12 +26,13 @@ jobs:
     needs: pre_ci
     runs-on: ubuntu-latest
     environment: Lint
-    if: "(!contains(needs.pre_ci.outputs.commit_message, '[skip lint]') && !contains(needs.pre_ci.outputs.commit_message, 'chore(release): '))"
+    if: "(!contains(needs.pre_ci.outputs.commit_message, '[skip lint]') &&
+      !contains(needs.pre_ci.outputs.commit_message, 'chore(release): '))"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 25
 
       - uses: pnpm/action-setup@v4
         id: pnpm-install
@@ -58,12 +59,13 @@ jobs:
     needs: pre_ci
     runs-on: ubuntu-latest
     environment: Test
-    if: "(!contains(needs.pre_ci.outputs.commit_message, '[skip test]') && !contains(needs.pre_ci.outputs.commit_message, 'chore(release): '))"
+    if: "(!contains(needs.pre_ci.outputs.commit_message, '[skip test]') &&
+      !contains(needs.pre_ci.outputs.commit_message, 'chore(release): '))"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 25
 
       - uses: pnpm/action-setup@v4
         id: pnpm-install
