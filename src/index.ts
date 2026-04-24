@@ -1,6 +1,6 @@
 import "dotenv/config";
 
-import { GatewayIntentBits, type ClientEvents } from "discord.js";
+import { GatewayIntentBits, Partials, type ClientEvents } from "discord.js";
 import ms from "ms";
 
 import { Addon } from "#classes/addon";
@@ -21,7 +21,9 @@ const client = new Client({
     GatewayIntentBits.GuildVoiceStates,
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildInvites,
+    GatewayIntentBits.DirectMessages,
   ],
+  partials: [Partials.Message, Partials.Channel],
 });
 
 // Set the client in the logger for shard detection
